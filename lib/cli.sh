@@ -1,6 +1,18 @@
+#!/usr/bin/env bash
+
 parse_arguments() {
 
+
+# printf "DEBUG: argument = '%s'\n" "${1:-}"
+
     case "${1:-}" in
+
+        "")
+	   banner
+	   check_environment
+	   print_modules "$PACKAGE_DIR"
+	   ;;
+
 
 	--help|-h)
 
@@ -23,20 +35,17 @@ parse_arguments() {
             print_summary "$modules" "$packages"
             ;;
 
-        *)
-
-            banner
-            check_environment
-            print_modules "$PACKAGE_DIR"
+	--version)
+    	    printf "%s\n" "$VERSION"
             ;;
 
+
 	*)
-	    error "Okänt argument: $1"
-	    echo
-	    print_help
+
+	    error "Okänt argument: ${1:-}"
+	    printf "Skriv '%s --help' för hjälp.\n" "$(basename "$0")"
 	    exit 1
 	    ;;
 
     esac
-
 }
