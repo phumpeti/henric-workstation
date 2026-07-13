@@ -63,16 +63,38 @@ print_summary() {
     packages=$(count_all_packages "$PACKAGE_DIR")
 
     echo
-    echo "=============================="
-    echo "Henric Workstation Bootstrap"
-    echo "=============================="
-    echo
-
     printf "%-20s %s\n" "Projektkatalog:" "$SCRIPT_DIR"
     printf "%-20s %d\n" "Moduler:" "$modules"
     printf "%-20s %d\n" "Paket:" "$packages"
 
 }
+
+print_help() {
+
+cat <<EOF
+Henric Workstation Bootstrap v$VERSION
+
+Användning:
+    bootstrap.sh [alternativ]
+
+Alternativ:
+
+    --help         Visa denna hjälp
+
+    --list         Visa alla moduler
+
+    --summary      Visa sammanfattning
+
+    --install      Installera alla moduler (kommer)
+
+    --doctor       Kontrollera systemet (kommer)
+
+    --update       Uppdatera systemet (kommer)
+
+EOF
+
+}
+
 
 
 info() {

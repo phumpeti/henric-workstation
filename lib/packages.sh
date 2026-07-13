@@ -1,5 +1,15 @@
 #!/bin/bash
 
+install_package() {
+
+    local package="$1"
+
+    info "Installerar $package..."
+
+#    sudo apt install -y "$package"
+
+}
+
 count_packages() {
 
     local module="$1"
