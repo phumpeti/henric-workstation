@@ -1,0 +1,5 @@
+borgbackup
+restic
+timeshift
+syncthing
+rclone

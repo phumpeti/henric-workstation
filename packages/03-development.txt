@@ -1,0 +1,7 @@
+default-jdk
+maven
+python3
+python3-pip
+docker.io
+docker-compose-v2
+imagemagick

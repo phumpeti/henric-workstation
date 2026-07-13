@@ -1,0 +1,8 @@
+samba
+cifs-utils
+sshfs
+openssh-client
+openssh-server
+avahi-daemon
+tailscale
+nfs-common

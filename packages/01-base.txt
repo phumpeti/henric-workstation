@@ -1,0 +1,16 @@
+git
+curl
+wget
+zip
+unzip
+htop
+btop
+tree
+ripgrep
+fd-find
+bat
+neovim
+build-essential
+firmware-linux-nonfree
+intel-microcode
+firmware-iwlwifi

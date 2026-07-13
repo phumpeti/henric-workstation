@@ -1,0 +1,6 @@
+libreoffice
+thunderbird
+baobab
+gparted
+vlc
+audacity

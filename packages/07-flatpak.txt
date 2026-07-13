@@ -1,0 +1,6 @@
+org.gimp.GIMP
+com.calibre_ebook.calibre
+org.raspberrypi.rpi-imager
+com.discordapp.Discord
+com.spotify.Client
+io.gitlab.librewolf-community
