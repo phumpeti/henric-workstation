@@ -13,6 +13,9 @@ parse_arguments() {
 	   print_modules "$PACKAGE_DIR"
 	   ;;
 
+	--dry-run)
+	    DRY_RUN=true
+	    ;;
 
 	--help|-h)
 

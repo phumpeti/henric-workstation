@@ -40,3 +40,30 @@ Pointed at wrong folder for bootstrap.sh
 - Åtgärdat felaktig argumentöverföring (`$0` → `"$@"`)
 - Åtgärdat flera buggar i `case`-hanteringen
 - Korrigerat syntaxfel i `cli.sh`
+
+
+## [0.5.0] - 2026-07-15
+
+### Added
+
+- Modular package installation framework
+- Package verification functions
+- Module discovery
+- read_module()
+- install_module()
+- Logging framework
+- VERSION file
+- Improved CLI structure
+
+### Changed
+
+- Refactored project architecture
+- Separated module and package responsibilities
+- Improved bootstrap structure
+- Improved logging
+
+### Fixed
+
+- Duplicate package functions removed
+- Function ordering improved
+- Various CLI bugs

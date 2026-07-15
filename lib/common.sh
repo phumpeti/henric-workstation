@@ -12,6 +12,45 @@ Version $VERSION
 EOF
 }
 
+
+log() {
+
+    local timestamp
+    local level="$1"
+    shift
+
+    timestamp=$(date '+%F %T')
+
+    case "$level" in
+
+        FAIL)
+            printf "[%s] %s\n" "$timestamp" "$level" "$*" >&2
+            ;;
+
+        *)
+            printf "[%s] %s\n" "$timestamp" "$level" "$*"
+            ;;
+
+    esac
+}
+
+info() {
+    log INFO "$@"
+}
+
+success() {
+    log " OK " "$@"
+}
+
+warn() {
+    log WARN "$@"
+}
+
+error() {
+    log FAIL "$@"
+}
+
+
 check_environment() {
 
     info "Kontrollerar miljön..."
@@ -27,7 +66,7 @@ check_environment() {
             success "Hittade $(basename "$dir")/"
         else
             error "Saknar $(basename "$dir")/"
-            exit 1
+            exit "@EXIT_ENVIRONMENT"
         fi
     done
 
@@ -48,7 +87,7 @@ check_commands() {
             success "$cmd"
         else
             error "$cmd saknas"
-            exit 1
+            exit "@EXIT_BAD_ARGUMENTS"
         fi
 
     done
@@ -96,26 +135,3 @@ EOF
 }
 
 
-
-info() {
-    printf "[INFO] %s\n" "$*"
-}
-
-success() {
-    printf "[ OK ] %s\n" "$*"
-}
-
-warn() {
-    printf "[WARN] %s\n" "$*"
-}
-
-error() {
-    printf "[FAIL] %s\n" "$*" >&2
-}
-success() {
-    printf "[ OK ] %s\n" "$*"
-}
-
-fail() {
-    printf "[FAIL] %s\n" "$*" >&2
-}
