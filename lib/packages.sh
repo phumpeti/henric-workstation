@@ -9,6 +9,10 @@
 #
 # Hanterar inte CLI eller loggning.
 
+##################################################
+# Module functions
+##################################################
+
 read_module() {
 
     local module="$1"
@@ -53,6 +57,10 @@ count_all_packages() {
     echo "$total"
 }
 
+##################################################
+# Package verification
+##################################################
+
 package_exists() {
 
     local package="$1"
@@ -94,74 +102,6 @@ verify_package() {
     fi
 
 }
-
-install_with_apt() {
-
-    local package="$1"
-
-    sudo apt install -y "$package"
-}
-
-install_package() {
-
-    local package="$1"
-
-# Finns paketet?
-    package_exists "$package" || {
-
-        error "Paketet '$package' finns inte."
-        return 1
-
-    }
-
-# Redan installerat?
-    package_installed "$package" && {
-
-        info "$package är redan installerat."
-        return 0
-
-    }
-# Möjlighet att göra en torrkörning
-
-    if [[ "$DRY_RUN" == true ]]; then
-        info "Skulle installera: $package"
-        return 0
-    fi
-
-    info "Installerar $package..."
-
-# Installera paketet
-    install_with_apt "$package"
-
-if install_with_apt "$package"; then
-
-    success "$package installerades."
-
-else
-
-    error "Kunde inte installera $package."
-
-    return 1
-
-fi
-
-}
-
-install_module() {
-
-    local module="$1"
-
-    info "Installerar modul $(basename "$module")"
-
-    while IFS= read -r package
-    do
-        install_package "$package"
-
-    done < <(read_module "$module")
-
-}
-
-
 
 
 

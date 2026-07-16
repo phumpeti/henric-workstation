@@ -67,3 +67,24 @@ Pointed at wrong folder for bootstrap.sh
 - Duplicate package functions removed
 - Function ordering improved
 - Various CLI bugs
+
+## [0.6.0] - 2026-07-16
+
+### Added
+
+- Implemented --install option
+- Installation sammanfattning
+- Status codes.
+- New modules constants.sh, exit_codes.sh. dev.sh
+
+### Changed
+
+- Structure Cleanup so that install related functions are in install.sh and so on.
+
+### Fixed
+
+- clean up of structure.
+- correct handling of bootstrap.sh for source.
+- fixed several bugs.
+
+Status: Stabile

@@ -11,9 +11,9 @@
 
 find_modules() {
 
-    local PACKAGE_DIR="$1"
+    local package_dir="$1"
 
-    find "$PACKAGE_DIR" \
+    find "$package_dir" \
         -maxdepth 1 \
         -type f \
         -name "*.txt" \
@@ -28,16 +28,15 @@ count_modules() {
 
 }
 
-install_module() {
+process_modules() {
 
-    local module="$1"
+    local callback="$1"
 
-    while read -r package
+    while IFS= read -r module
     do
+        "$callback" "$module"
 
-        install_package "$package"
-
-    done < <(read_module "$module")
+    done < <(find_modules "$PACKAGE_DIR")
 
 }
 
@@ -55,21 +54,9 @@ print_modules() {
             "$(basename "$module")" \
             "$count"
 
-    done < <(find_modules "$PACKAGE_DIR")
+    done < <(find_modules "$package_dir")
 
 }
-
-install_all_modules() {
-
-    while read -r module
-    do
-
-        install_module "$module"
-
-    done < <(find_modules "$PACKAGE_DIR")
-
-}
-
 
 test_read_module() {
 
@@ -83,3 +70,5 @@ test_read_module() {
     fi
 
 }
+
+

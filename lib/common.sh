@@ -124,7 +124,7 @@ Alternativ:
 
     --summary      Visa sammanfattning
 
-    --install      Installera alla moduler (kommer)
+    --install      Installera alla moduler
 
     --doctor       Kontrollera systemet (kommer)
 
@@ -133,5 +133,16 @@ Alternativ:
 EOF
 
 }
+
+section() {
+
+    local title="$1"
+
+    echo
+    printf '%*s\n' 40 '' | tr ' ' '='
+    echo "$title"
+    printf '%*s\n' 40 '' | tr ' ' '='
+}
+
 
 

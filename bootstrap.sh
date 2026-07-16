@@ -2,6 +2,8 @@
 
 set -Eeuo pipefail
 
+readonly START_TIME=$SECONDS
+
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly VERSION="$(<"$SCRIPT_DIR/VERSION")"
 
@@ -12,9 +14,12 @@ readonly CONFIG_DIR="$SCRIPT_DIR/config"
 source "$CONFIG_DIR/environment.conf"
 
 source "$SCRIPT_DIR/lib/common.sh"
+source "$SCRIPT_DIR/lib/constants.sh"
 source "$SCRIPT_DIR/lib/modules.sh"
 source "$SCRIPT_DIR/lib/packages.sh"
+source "$SCRIPT_DIR/lib/install.sh"
 source "$SCRIPT_DIR/lib/cli.sh"
+
 
 readonly LOG_DIR="$SCRIPT_DIR/logs"
 
@@ -26,4 +31,8 @@ main() {
 	parse_arguments "$@"
 }
 
-main "$@"
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    main "$@"
+fi
+
+info "Tid: ${SECONDS}s"
