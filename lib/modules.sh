@@ -9,6 +9,14 @@
 #
 # Hanterar aldrig paket.
 
+find_module() {
+
+    local name="$1"
+
+    find_modules "$PACKAGE_DIR" |
+        grep -E "/[0-9]+-${name}\.txt$"
+}
+
 find_modules() {
 
     local package_dir="$1"

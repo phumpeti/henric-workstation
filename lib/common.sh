@@ -24,11 +24,11 @@ log() {
     case "$level" in
 
         FAIL)
-            printf "[%s] %s\n" "$timestamp" "$level" "$*" >&2
+            printf "[%s] %s-5s %s\n" "$timestamp" "$level" "$*" >&2
             ;;
 
         *)
-            printf "[%s] %s\n" "$timestamp" "$level" "$*"
+            printf "[%s] %s-5a %s\n" "$timestamp" "$level" "$*" >&2
             ;;
 
     esac
@@ -66,7 +66,7 @@ check_environment() {
             success "Hittade $(basename "$dir")/"
         else
             error "Saknar $(basename "$dir")/"
-            exit "@EXIT_ENVIRONMENT"
+            exit "$EXIT_ENVIRONMENT"
         fi
     done
 
@@ -87,7 +87,7 @@ check_commands() {
             success "$cmd"
         else
             error "$cmd saknas"
-            exit "@EXIT_BAD_ARGUMENTS"
+            exit "$EXIT_BAD_ARGUMENTS"
         fi
 
     done
@@ -126,7 +126,7 @@ Alternativ:
 
     --install      Installera alla moduler
 
-    --doctor       Kontrollera systemet (kommer)
+    --doctor       Kontrollera systemet
 
     --update       Uppdatera systemet (kommer)
 

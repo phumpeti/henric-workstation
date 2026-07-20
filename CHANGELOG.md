@@ -87,4 +87,33 @@ Pointed at wrong folder for bootstrap.sh
 - correct handling of bootstrap.sh for source.
 - fixed several bugs.
 
+## [0.6.0] - 2026-07-20
+
+### Added
+- Nytt installationssystem (`install.sh`).
+- Stöd för installation av enskilda moduler (`--install <modul>`).
+- Stöd för `--dry-run`.
+- Nytt diagnostikkommando (`--doctor`).
+- Installationssammanfattning med statistik.
+- Gemensamma statuskoder för installation.
+- Gemensamma exit-koder.
+- Projektkonstanter i egen modul.
+
+### Changed
+- Projektet har delats upp i mindre moduler med tydligare ansvar.
+- CLI:t har refaktorerats och stöder nu flera argument.
+- Installationsflödet har förenklats och blivit mer modulärt.
+- Förbättrad loggning och utskrift under installation.
+- Förbättrad struktur för felsökning och framtida utbyggnad.
+
+### Fixed
+- Flera problem i argumenthanteringen.
+- Korrekt hantering av `set -Eeuo pipefail`.
+- Flera problem med `readonly`-variabler.
+- Förbättrad hantering av ShellCheck-varningar.
+- Åtgärdat flera fel i installationsflödet.
+
+
+
+
 Status: Stabile

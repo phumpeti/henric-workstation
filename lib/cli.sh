@@ -3,13 +3,21 @@
 parse_arguments() {
 
     local command=""
-    local module packages
+    local module=""
+    local packages=""
+    local modules=""
+
 
 # printf "DEBUG: argument = '%s'\n" "${1:-}"
 
    while [[ $# -gt 0 ]] ; do
 
     case "$1" in
+
+        --doctor)
+
+            command="doctor"
+            ;;
 
         --dry-run)
 
@@ -19,6 +27,12 @@ parse_arguments() {
         --install)
 
             command="install"
+
+            if [[ $# -gt 1 && "${2:0:1}" != "-" ]]; then
+                module="$2"
+                shift
+            fi
+
             ;;
 
         --summary)
@@ -53,6 +67,8 @@ parse_arguments() {
 
 done
 
+echo "DEBUG: command=$command module=$module DRY_RUN=${DRY_RUN:-false}"
+
 case "$command" in
 
     "")
@@ -60,6 +76,11 @@ case "$command" in
         banner
         check_environment
         print_modules "$PACKAGE_DIR"
+        ;;
+
+    doctor)
+
+        doctor
         ;;
 
     help)
@@ -89,14 +110,22 @@ case "$command" in
         ;;
 
     install)
-
-        if [[ "$DRY_RUN" == true ]]; then
+        echo "DEBUG: command=$command module=$module DRY_RUN=${DRY_RUN:-false}"
+        if [[ "${DRY_RUN:-false}" == true ]]; then
             warn "DRY RUN - inga paket kommer att installeras."
             echo
         fi
 
-        install_all_modules
+         if [[ -n "$module" ]]; then
+            install_named_module "$module"
+        else
+            install_all_modules
+        fi
+
         ;;
 
 esac
+
+
+info "Tid: ${SECONDS}s"
 }

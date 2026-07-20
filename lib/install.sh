@@ -19,7 +19,6 @@ install_all_modules() {
     do
 
         install_module "$module"
-        print_install_status "$status"
 
     done < <(find_modules "$PACKAGE_DIR")
 
@@ -39,18 +38,35 @@ install_module() {
 
     while IFS= read -r package
     do
-        ((current++))
+
+        ((++current))
 
         printf "[%02d/%02d] %-30s" \
             "$current" \
             "$total" \
             "$package"
 
+echo "Calling install_package"
         install_package "$package"
         status=$?
         print_install_status "$status"
 
     done < <(read_module "$module")
+}
+
+install_named_module() {
+
+    local name="$1"
+    local module
+
+    module=$(find_module "$name")
+
+    if [[ -z "$module" ]]; then
+        error "Modulen '$name' finns inte."
+        return "$EXIT_BAD_ARGUMENTS"
+    fi
+
+    install_module "$module"
 }
 
 print_install_status() {
@@ -60,17 +76,17 @@ print_install_status() {
     case "$status" in
 
         "$STATUS_OK")
-            ((installed_count++))
+            ((++installed_count))
             echo " [ OK ]"
             ;;
 
         "$STATUS_ALREADY_INSTALLED")
-            ((skipped_count++))
+            ((++skipped_count))
             echo " [SKIP]"
             ;;
 
         "$STATUS_DRY_RUN")
-            ((dry_run_count++))
+            ((++dry_run_count))
             echo " [DRY ]"
             ;;
 
@@ -81,7 +97,6 @@ print_install_status() {
 
     esac
 }
-
 
 install_package() {
 
