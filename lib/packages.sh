@@ -13,7 +13,7 @@
 # Module functions
 ##################################################
 
-read_module() {
+read_package_list() {
 
     local module="$1"
 

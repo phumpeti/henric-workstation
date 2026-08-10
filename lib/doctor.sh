@@ -1,22 +1,26 @@
 #!/usr/bin/env bash
 
+passed_checks=0
+info_checks=0
+warning_checks=0
+failed_checks=0
+
+
 doctor() {
 
     banner
 
     info "Running diagnostics..."
     echo
-
-    check_project
-    check_environment
-    check_commands
-    check_shellcheck
-
+    check_os
+    check_architecture
+    check_sudo
     check_network
-
-    check_apt
-
+    check_package_manager
+    check_required_commands
 }
+
+
 
 run_check() {
 
@@ -42,6 +46,7 @@ check_file() {
 
     if [[ -f "$file" ]]; then
         success "$(basename "$file")"
+        (( passed_checks++))
     else
         error "Saknar $(basename "$file")"
         return 1

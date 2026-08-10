@@ -1,4 +1,5 @@
 ffmpeg
+gpodder
 libavcodec-extra
 gstreamer1.0-libav
 gstreamer1.0-plugins-good

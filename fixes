@@ -1,0 +1,81 @@
+✓ gvfs saknades
+  → lagt till i 02-network
+
+✓ Tailscale finns inte i Debians repo
+  → egen installationsfunktion
+
+✓ set -e + statuskoder
+  → refaktorera
+
+✓ failed_count++
+  → bugfix
+
+Need Google Chrome, Edge and...
+
+sudo apt install curl
+
+sudo curl -fsSLo /usr/share/keyrings/brave-browser-archive-keyring.gpg \
+https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg
+
+echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main" | \
+sudo tee /etc/apt/sources.list.d/brave-browser-release.list
+
+sudo apt update
+
+sudo apt install brave-browser
+
+gimp saknas.
+
+sudo apt update
+sudo apt install wget gpg apt-transport-https
+
+wget -qO- https://packages.microsoft.com/keys/microsoft.asc | \
+gpg --dearmor | \
+sudo tee /usr/share/keyrings/packages.microsoft.gpg >/dev/null
+
+echo "deb [arch=amd64 signed-by=/usr/share/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" | \
+sudo tee /etc/apt/sources.list.d/vscode.list
+
+sudo apt update
+sudo apt install code
+
+flatpak
+sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+
+
+flatpak install flathub com.jetbrains.IntelliJ-IDEA-Community
+
+flatpak install flathub com.getpostman.Postman
+
+
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+
+sudo apt install nodejs
+
+mkdir ~/playwright
+cd ~/playwright
+
+npm init -y
+
+npm init playwright@latest
+
+Paket mp3tag
+kid3 kid3-cli
+libimage-exiftool-perl
+eyed3 
+
+Spara Old Excalibur filer och se till att de installeras av skriptet. Rader som följer installerar filerna till alla användare.
+
+sudo mkdir -p /usr/local/share/fonts/OldExcalibur
+
+sudo cp OldExcalibur*.ttf /usr/local/share/fonts/OldExcalibur/
+
+sudo fc-cache -fv
+
+# git shortcur att infoga i ~/,bashrc
+
+gacp() {
+git add .
+git commit -m "$*@ && git push
+}
+

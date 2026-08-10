@@ -1,0 +1,116 @@
+#!/usr/bin/env bash
+
+detect_system() {
+
+    [[ -f /etc/os-release ]] || return 1
+
+    source /etc/os-release
+
+    CPU_ARCH="$(uname -m)"
+    OS_ID="$ID"
+    OS_VERSION="$VERSION_ID"
+    OS_NAME="$PRETTY_NAME"
+    OS_CODENAME="$VERSION_CODENAME"
+
+    return 0
+}
+
+
+check_os() {
+
+    detect_system || {
+        error " Kan inte identifiera operativsystem ." 
+        return 1
+    }
+    
+    if [[ "$OS_ID" != "debian" ]]; then
+        error "Endast Debian stöds (hittade "$OS_ID")."
+        return 1
+    fi
+    
+    success "$OS_NAME"
+    return 0 
+}
+
+
+check_architecture() {
+
+    detect_system || return 1
+
+    case "$CPU_ARCH" in
+        x86_64)
+            success "Architecture: $CPU_ARCH"
+            ;;
+        *)
+            warning "Architecture $CPU_ARCH is not supported."
+            return 1
+            ;;
+    esac
+}
+
+check_sudo() {
+
+    # Finns sudo?
+    if ! command -v sudo >/dev/null 2>&1; then
+        error "sudo is not installed."
+        return 1
+    fi
+
+    success "sudo installed"
+
+    # Är användaren medlem?
+    if ! id -nG "$USER" | grep -qw sudo; then
+        error "User is not a member of the sudo group."
+        return 1
+    fi
+
+    success "User belongs to sudo group."
+
+    # Finns en aktiv session?
+    if sudo -n true >/dev/null 2>&1; then
+        success "sudo session active."
+    else
+        info "sudo password required."
+    fi
+}
+
+check_network() {
+
+    if ping -c1 -W2 deb.debian.org >/dev/null 2>&1; then
+        success "Internet connection"
+        return 0
+    fi
+
+    error "No Internet connection"
+        return 1
+}
+
+check_commands() {
+
+    local command
+
+    for command in "$@"; do
+
+        if command -v "$command" >/dev/null 2>&1; then
+            success "$command"
+        else
+            error "$command"
+            return 1
+        fi
+
+    done
+}
+
+
+
+check_package_manager() {
+    section "Checking package manager..."
+    check_commands "${PACKAGE_MANAGER_COMMANDS[@]}"
+}
+
+check_required_commands() {
+    section "Checking required commands..."
+    check_commands "${REQUIRED_COMMANDS[@]}"
+}
+
+

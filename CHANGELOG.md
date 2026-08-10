@@ -113,6 +113,28 @@ Pointed at wrong folder for bootstrap.sh
 - Förbättrad hantering av ShellCheck-varningar.
 - Åtgärdat flera fel i installationsflödet.
 
+## [0.6.1] - 2026-08-10
+
+### Added
+- Modular system diagnostics (`doctor`)
+- Operating system detection
+- CPU architecture detection
+- Sudo diagnostics
+- Package manager diagnostics
+- Required command diagnostics
+- Diagnostic output grouped into sections
+
+### Changed
+- Refactored system detection into dedicated functions
+- Improved project architecture with detect/check pattern
+
+### Fixed
+- Improved Bash error handling
+- Fixed status handling for package installation
+
+
+
+
 
 
 

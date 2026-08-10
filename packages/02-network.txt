@@ -1,4 +1,5 @@
 samba
+gvfs
 cifs-utils
 sshfs
 openssh-client

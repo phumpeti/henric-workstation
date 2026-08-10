@@ -63,3 +63,10 @@ Simulera installation:
 ```bash
 ./bootstrap.sh --install --dry-run
 ```
+
+## Diagnostics
+
+Run a full system diagnostic before installation:
+
+```bash
+./bootstrap.sh --doctor

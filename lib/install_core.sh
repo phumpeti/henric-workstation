@@ -47,8 +47,10 @@ install_module() {
             "$package"
 
 echo "Calling install_package"
+	set +e
         install_package "$package"
         status=$?
+	set -e
         print_install_status "$status"
 
     done < <(read_module "$module")
@@ -91,7 +93,7 @@ print_install_status() {
             ;;
 
         "$STATUS_FAILED")
-            ((failed_count++))
+            ((++failed_count))
             echo " [FAIL]"
             ;;
 

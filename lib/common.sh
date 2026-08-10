@@ -7,11 +7,10 @@ cat << EOF
 
 Henric Workstation Bootstrap
 
-Version $VERSION
+Version $APP_VERSION
 
 EOF
 }
-
 
 log() {
 
