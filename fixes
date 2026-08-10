@@ -79,3 +79,10 @@ git add .
 git commit -m "$*@ && git push
 }
 
+Git / SSH
+
+✓ Install git
+✓ Configure git user.name
+✓ Configure git user.email
+✓ Generate SSH key (if missing)
+✓ Print public key for GitHub
