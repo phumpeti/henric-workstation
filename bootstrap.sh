@@ -4,7 +4,7 @@ set -Eeuo pipefail
 
 readonly START_TIME=$SECONDS
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly APP_VERSION="$(<"$SCRIPT_DIR/VERSION")"
+readonly APP_VERSION="$(cat VERSION)"
 readonly PACKAGE_DIR="$SCRIPT_DIR/packages"
 readonly LIB_DIR="$SCRIPT_DIR/lib"
 readonly CONFIG_DIR="$SCRIPT_DIR/config"

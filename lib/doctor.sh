@@ -1,43 +1,20 @@
 #!/usr/bin/env bash
 
-passed_checks=0
-info_checks=0
-warning_checks=0
-failed_checks=0
-
+DOCTOR_MODE=true
 
 doctor() {
 
     banner
 
-    info "Running diagnostics..."
-    echo
+    section "Running diagnostics..."
     check_os
     check_architecture
     check_sudo
     check_network
     check_package_manager
     check_required_commands
-}
-
-
-
-run_check() {
-
-    local check="$1"
-
-    if "$check"; then
-        ((doctor_ok++))
-    else
-        ((doctor_failed++))
-    fi
-
-}
-
-check_shellcheck() {
-
-    command -v shellcheck >/dev/null 2>&1
-
+    check_project
+    print_doctor_summary
 }
 
 check_file() {
@@ -46,7 +23,6 @@ check_file() {
 
     if [[ -f "$file" ]]; then
         success "$(basename "$file")"
-        (( passed_checks++))
     else
         error "Saknar $(basename "$file")"
         return 1
@@ -69,9 +45,12 @@ check_directory() {
 
 check_project() {
 
+    section "Checking necessary files and directories" 
+
     check_file "$SCRIPT_DIR/VERSION"
     check_file "$SCRIPT_DIR/CHANGELOG.md"
     check_file "$SCRIPT_DIR/bootstrap.sh"
+    check_file "$SCRIPT_DIR/README.md"
 
     check_directory "$SCRIPT_DIR/packages"
     check_directory "$SCRIPT_DIR/lib"

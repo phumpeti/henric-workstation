@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+success_count=0
+info_count=0
+warning_count=0
+error_count=0
 
 banner() {
 
@@ -34,18 +38,30 @@ log() {
 }
 
 info() {
+    if [[ "$DOCTOR_MODE" == true ]]; then
+        ((++info_count))
+    fi
     log INFO "$@"
 }
 
 success() {
+    if [[ "$DOCTOR_MODE" == true ]]; then
+    ((++success_count))
+    fi
     log " OK " "$@"
 }
 
 warn() {
+    if [[ "$DOCTOR_MODE" == true ]]; then
+    ((++warning_count))
+    fi
     log WARN "$@"
 }
 
 error() {
+    if [[ "$DOCTOR_MODE" == true ]]; then
+    ((++error_count))
+    fi
     log FAIL "$@"
 }
 
@@ -144,4 +160,18 @@ section() {
 }
 
 
+check_commands() {
 
+    local command
+
+    for command in "$@"; do
+
+        if command -v "$command" >/dev/null 2>&1; then
+            success "$command"
+        else
+            error "$command"
+            return 1
+        fi
+
+    done
+}

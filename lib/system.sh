@@ -17,7 +17,7 @@ detect_system() {
 
 
 check_os() {
-
+    section " Operating system"
     detect_system || {
         error " Kan inte identifiera operativsystem ." 
         return 1
@@ -42,14 +42,14 @@ check_architecture() {
             success "Architecture: $CPU_ARCH"
             ;;
         *)
-            warning "Architecture $CPU_ARCH is not supported."
+            warn "Architecture $CPU_ARCH is not supported."
             return 1
             ;;
     esac
 }
 
 check_sudo() {
-
+    section "Sudo"
     # Finns sudo?
     if ! command -v sudo >/dev/null 2>&1; then
         error "sudo is not installed."
@@ -75,7 +75,7 @@ check_sudo() {
 }
 
 check_network() {
-
+    section "Network"
     if ping -c1 -W2 deb.debian.org >/dev/null 2>&1; then
         success "Internet connection"
         return 0
@@ -84,24 +84,6 @@ check_network() {
     error "No Internet connection"
         return 1
 }
-
-check_commands() {
-
-    local command
-
-    for command in "$@"; do
-
-        if command -v "$command" >/dev/null 2>&1; then
-            success "$command"
-        else
-            error "$command"
-            return 1
-        fi
-
-    done
-}
-
-
 
 check_package_manager() {
     section "Checking package manager..."
@@ -113,4 +95,19 @@ check_required_commands() {
     check_commands "${REQUIRED_COMMANDS[@]}"
 }
 
+print_doctor_summary() {
 
+section "Summary"
+
+printf "%-20s %d\n" "Successful:" "$success_count"
+printf "%-20s %d\n" "Information:" "$info_count"
+printf "%-20s %d\n" "Warnings:" "$warning_count"
+printf "%-20s %d\n" "Errors:" "$error_count"
+
+    if (( error_count == 0 )); then
+        success "System ready for installation."
+    else
+        error "Problems detected."
+    fi
+DOCTOR_MODE=false    
+}
