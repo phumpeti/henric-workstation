@@ -13,50 +13,6 @@
 # Module functions
 ##################################################
 
-read_package_list() {
-
-    local module="$1"
-
-    if [[ ! -f "$module" ]]; then
-        error "Modulen '$module' finns inte."
-        return 1
-    fi
-
-    while IFS= read -r package
-    do
-        [[ -z "$package" ]] && continue
-        [[ "$package" =~ ^[[:space:]]*# ]] && continue
-
-        printf "%s\n" "$package"
-
-    done < "$module"
-
-}
-
-count_packages() {
-
-    local module="$1"
-
-    grep -v '^[[:space:]]*$' "$module" \
-        | grep -v '^#' \
-        | wc -l
-
-}
-
-count_all_packages() {
-
-    local package_dir="$1"
-    local total=0
-
-    while read -r module
-    do
-        (( total += $(count_packages "$module") ))
-
-    done < <(find_modules "$package_dir")
-
-    echo "$total"
-}
-
 ##################################################
 # Package verification
 ##################################################
@@ -101,6 +57,35 @@ verify_package() {
 
     fi
 
+}
+
+count_all_packages() {
+    local package_dir="$1"
+    local backend_dir
+    local module
+    local total=0
+    local count
+
+    while IFS= read -r backend_dir
+    do
+        while IFS= read -r module
+        do
+            count=$(grep -v '^[[:space:]]*$' "$module" |
+                    grep -v '^[[:space:]]*#' |
+                    wc -l)
+
+            (( total += count ))
+        done < <(find_modules "$backend_dir")
+
+    done < <(
+        find "$package_dir" \
+            -mindepth 1 \
+            -maxdepth 1 \
+            -type d |
+            sort
+    )
+
+    echo "$total"
 }
 
 
