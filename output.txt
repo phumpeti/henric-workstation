@@ -1,166 +1,0 @@
-DEBUG: command=install module= DRY_RUN=false
-DEBUG: command=install module= DRY_RUN=false
-Kontrollfunktion: apt_is_installed
-Installationsfunktion: apt_install
-Modul: 01-base.txt
-Backend: apt
-Installerat: git
-Installerat: curl
-Installerat: wget
-Installerat: zip
-Installerat: unzip
-Installerat: htop
-Installerat: btop
-Installerat: tree
-Installerat: ripgrep
-Installerat: fd-find
-Installerat: bat
-Installerat: neovim
-Installerat: build-essential
-Installerat: firmware-linux-nonfree
-Installerat: intel-microcode
-Installerat: firmware-iwlwifi
-
-Saknade paket: 0
-Kontrollfunktion: apt_is_installed
-Installationsfunktion: apt_install
-Modul: 02-network.txt
-Backend: apt
-Installerat: samba
-Installerat: gvfs
-Installerat: cifs-utils
-Installerat: sshfs
-Installerat: openssh-client
-Installerat: openssh-server
-Installerat: avahi-daemon
-Saknas: tailscale
-Installerat: nfs-common
-
-Saknade paket: 1
-Läser paketlistor…
-Bygger beroendeträd…
-Läser tillståndsinformation…
-Kontrollfunktion: apt_is_installed
-Installationsfunktion: apt_install
-Modul: 03-development.txt
-Backend: apt
-Installerat: default-jdk
-Installerat: maven
-Installerat: python3
-Installerat: python3-pip
-Installerat: docker.io
-Saknas: docker-compose
-Installerat: imagemagick
-
-Saknade paket: 1
-Läser paketlistor…
-Bygger beroendeträd…
-Läser tillståndsinformation…
-Följande paket har installerats automatiskt och är inte längre nödvändiga:
-  libaom3:i386 libavutil59:i386 libcodec2-1.2:i386 libdb5.3t64:i386
-  libgomp1:i386 libgsm1:i386 libhwy1t64:i386 libjack-jackd2-0:i386
-  libjxl0.11:i386 libnuma1:i386 libopenjp2-7:i386 librav1e0.7:i386
-  libshine3:i386 libsnappy1v5:i386 libsoxr0:i386 libspeex1:i386
-  libspeexdsp1:i386 libsvtav1enc2:i386 libswresample5:i386 libtheoradec1:i386
-  libtheoraenc1:i386 libtwolame0:i386 libvdpau-va-gl1:i386 libvdpau1:i386
-  libvpx9:i386 libwebpmux3:i386 libx264-164:i386 libx265-215:i386
-  libxvidcore4:i386 libzvbi0t64:i386 linux-image-6.12.101+deb13-amd64
-  mesa-vdpau-drivers:i386 ocl-icd-libopencl1:i386 vdpau-driver-all:i386
-Använd ”sudo apt autoremove” för att ta bort dem.
-Följande NYA paket kommer att installeras:
-  docker-compose
-0 att uppgradera, 1 att nyinstallera, 0 att ta bort och 0 att inte uppgradera.
-Behöver hämta 13,0 MB arkiv.
-Efter denna åtgärd kommer ytterligare 64,4 MB utrymme användas på disken.
-Läs:1 http://deb.debian.org/debian trixie/main amd64 docker-compose amd64 2.26.1-4 [13,0 MB]
-Hämtade 13,0 MB på 1s (9 391 kB/s)
-Väljer tidigare ej valt paket docker-compose.
-(Läser databasen ... (Läser databasen ... 5 %(Läser databasen ... 10 %(Läser databasen ... 15 %(Läser databasen ... 20 %(Läser databasen ... 25 %(Läser databasen ... 30 %(Läser databasen ... 35 %(Läser databasen ... 40 %(Läser databasen ... 45 %(Läser databasen ... 50 %(Läser databasen ... 55 %(Läser databasen ... 60 %(Läser databasen ... 65 %(Läser databasen ... 70 %(Läser databasen ... 75 %(Läser databasen ... 80 %(Läser databasen ... 85 %(Läser databasen ... 90 %(Läser databasen ... 95 %(Läser databasen ... 100 %(Läser databasen ... 305031 filer och kataloger installerade.)
-Förbereder att packa upp .../docker-compose_2.26.1-4_amd64.deb ...
-Packar upp docker-compose (2.26.1-4) ...
-Ställer in docker-compose (2.26.1-4) ...
-Hanterar utlösare för man-db (2.13.1-1) ...
-Kontrollfunktion: apt_is_installed
-Installationsfunktion: apt_install
-Modul: 04-desktop.txt
-Backend: apt
-Installerat: libreoffice
-Installerat: thunderbird
-Installerat: baobab
-Installerat: gparted
-Installerat: vlc
-Installerat: audacity
-
-Saknade paket: 0
-Kontrollfunktion: apt_is_installed
-Installationsfunktion: apt_install
-Modul: 05-media.txt
-Backend: apt
-Installerat: ffmpeg
-Installerat: gpodder
-Installerat: libavcodec-extra
-Installerat: gstreamer1.0-libav
-Installerat: gstreamer1.0-plugins-good
-Installerat: gstreamer1.0-plugins-bad
-Installerat: gstreamer1.0-plugins-ugly
-
-Saknade paket: 0
-Kontrollfunktion: apt_is_installed
-Installationsfunktion: apt_install
-Modul: 06-backup.txt
-Backend: apt
-Installerat: borgbackup
-Installerat: restic
-Installerat: timeshift
-Installerat: syncthing
-Installerat: rclone
-
-Saknade paket: 0
-Kontrollfunktion: apt_is_installed
-Installationsfunktion: apt_install
-Modul: 08-testing.txt
-Backend: apt
-Installerat: jmeter
-Installerat: jq
-Installerat: yq
-
-Saknade paket: 0
-Kontrollfunktion: apt_is_installed
-Installationsfunktion: apt_install
-Modul: 09-virtualization.txt
-Backend: apt
-Installerat: docker.io
-Installerat: docker-compose
-Installerat: podman
-Installerat: qemu-system
-Installerat: virt-manager
-
-Saknade paket: 0
-Kontrollfunktion: apt_is_installed
-Installationsfunktion: apt_install
-Modul: 10-system.txt
-Backend: apt
-Installerat: openssh-server
-Installerat: nfs-common
-Installerat: avahi-daemon
-
-Saknade paket: 0
-Kontrollfunktion: flatpak_is_installed
-Installationsfunktion: flatpak_install
-Modul: 01-development.txt
-Backend: flatpak
-Installerat: com.getpostman.Postman
-
-Saknade paket: 0
-Kontrollfunktion: flatpak_is_installed
-Installationsfunktion: flatpak_install
-Modul: 07-flatpak.txt
-Backend: flatpak
-Installerat: org.gimp.GIMP
-Installerat: com.calibre_ebook.calibre
-Installerat: org.raspberrypi.rpi-imager
-Installerat: com.discordapp.Discord
-Installerat: com.spotify.Client
-Installerat: io.gitlab.librewolf-community
-
-Saknade paket: 0

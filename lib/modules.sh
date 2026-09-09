@@ -149,7 +149,21 @@ process_module() {
 
     printf '\nSaknade paket: %d\n' "${#missing_packages[@]}"
 
-    if (( ${#missing_packages[@]} > 0 ))
+for package in "${missing_packages[@]}"
+do
+    repository=$(package_repository "$package") || true
+
+    if [[ -n "$repository" ]]
+    then
+        if ! ensure_repository "$repository"
+        then
+            error "Kunde inte förbereda repository: $repository"
+            return 1
+        fi
+    fi
+done
+
+if (( ${#missing_packages[@]} > 0 ))
 then
     if ! "${backend_functions[1]}" "${missing_packages[@]}"
     then
