@@ -10,11 +10,21 @@
 # Hanterar aldrig paket.
 
 find_module() {
-
     local name="$1"
+    local backend_dir
 
-    find_modules "$PACKAGE_DIR" |
-        grep -E "/[0-9]+-${name}\.txt$"
+    while IFS= read -r backend_dir
+    do
+        find_modules "$backend_dir" |
+            grep -E "/[0-9]+-${name}\.txt$"
+
+    done < <(
+        find "$PACKAGE_DIR" \
+            -mindepth 1 \
+            -maxdepth 1 \
+            -type d |
+            sort
+    )
 }
 
 find_modules() {
@@ -108,6 +118,8 @@ process_module() {
     local -a backend_functions
     local -a missing_packages=()
 
+    load_backends
+
     backend=$(get_backend "$module")
 
    mapfile -t backend_functions < <(get_backend_functions "$backend")
@@ -149,19 +161,22 @@ process_module() {
 
     printf '\nSaknade paket: %d\n' "${#missing_packages[@]}"
 
-for package in "${missing_packages[@]}"
-do
-    repository=$(package_repository "$package") || true
+if [[ "${DRY_RUN:-false}" != true ]]
+then
+    for package in "${missing_packages[@]}"
+    do
+        repository=$(package_repository "$package") || true
 
-    if [[ -n "$repository" ]]
-    then
-        if ! ensure_repository "$repository"
+        if [[ -n "$repository" ]]
         then
-            error "Kunde inte förbereda repository: $repository"
-            return 1
+            if ! ensure_repository "$repository"
+            then
+                error "Kunde inte förbereda repository: $repository"
+                return 1
+            fi
         fi
-    fi
-done
+    done
+fi
 
 if (( ${#missing_packages[@]} > 0 ))
 then
@@ -181,7 +196,6 @@ process_modules() {
     local backend_dir
     local status=0
 
-    load_backends
 
     while IFS= read -r backend_dir
     do
@@ -232,7 +246,10 @@ get_backend_functions() {
             printf '%s\n' "flatpak_is_installed"
             printf '%s\n' "flatpak_install"
             ;;
-
+        npm)
+            printf '%s\n' "npm_is_installed"
+            printf '%s\n' "npm_install"
+            ;;
         *)
             error "Okänd backend: $backend"
             return 1
@@ -244,7 +261,7 @@ is_supported_backend() {
     local backend="$1"
 
     case "$backend" in
-        apt|flatpak)
+        apt|flatpak|npm)
             return 0
             ;;
         *)
@@ -256,4 +273,5 @@ is_supported_backend() {
 load_backends() {
     source "$SCRIPT_DIR/lib/apt.sh"
     source "$SCRIPT_DIR/lib/flatpak.sh"
+    source "$SCRIPT_DIR/lib/npm.sh"
 }
