@@ -18,6 +18,14 @@ npm_is_installed() {
 }
 
 npm_install() {
+    if [[ "${DRY_RUN:-false}" == true ]]
+    then
+        printf 'DRY RUN: npm install --prefix "%s" -g %s\n' \
+            "$(npm_prefix)" \
+            "$*"
+        return 0
+    fi
+
     npm install \
         --prefix "$(npm_prefix)" \
         -g "$@"

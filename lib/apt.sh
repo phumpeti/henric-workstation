@@ -9,5 +9,11 @@ apt_is_installed() {
 }
 
 apt_install() {
+    if [[ "${DRY_RUN:-false}" == true ]]
+    then
+        printf 'DRY RUN: apt-get install -y %s\n' "$*"
+        return 0
+    fi
+
     sudo apt-get install -y "$@"
 }

@@ -57,17 +57,6 @@ count_modules() {
     echo "$total"
 }
 
-process_modules() {
-
-    local callback="$1"
-
-    while IFS= read -r module
-    do
-        "$callback" "$module"
-
-    done < <(find_modules "$PACKAGE_DIR")
-
-}
 
 print_modules() {
 

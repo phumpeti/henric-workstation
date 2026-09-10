@@ -7,5 +7,11 @@ flatpak_is_installed() {
 }
 
 flatpak_install() {
+    if [[ "${DRY_RUN:-false}" == true ]]
+    then
+        printf 'DRY RUN: flatpak install -y flathub %s\n' "$*"
+        return 0
+    fi
+
     flatpak install -y flathub "$@"
 }
