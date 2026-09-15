@@ -88,25 +88,6 @@ check_environment() {
     echo
 }
 
-check_commands() {
-
-    local commands=(
-        bash
-        git
-        apt
-    )
-
-    for cmd in "${commands[@]}"; do
-
-        if command -v "$cmd" >/dev/null 2>&1; then
-            success "$cmd"
-        else
-            error "$cmd saknas"
-            exit "$EXIT_BAD_ARGUMENTS"
-        fi
-
-    done
-}
 
 print_summary() {
 
@@ -126,7 +107,7 @@ print_summary() {
 print_help() {
 
 cat <<EOF
-Henric Workstation Bootstrap v$VERSION
+Henric Workstation Bootstrap v$APP_VERSION
 
 Användning:
     bootstrap.sh [alternativ]
