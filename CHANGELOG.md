@@ -2,140 +2,138 @@
 
 Alla betydande förändringar i projektet dokumenteras här.
 
-## v0.1.0 - 2026-07-05
-
-Pointed at wrong folder for bootstrap.sh
-
-## v0.4.0 - 2026-07-13
+## [0.9.0] - 2026-09-15
 
 ### Tillagt
-- Modulär projektstruktur
-- Miljökontroller
-- Modulupptäckt
-- Paketräkning
-- Sammanfattning
-- Kommandoradsargument
-- `--help`
-- `--list`
-- `--summary`
+- Omfattande testsvit med 85 gröna tester för kärnfunktioner, CLI, systemdiagnostik, moduler, paket och backends.
+- Backendstöd för APT, Flatpak och npm testas separat och i kombination med modulsystemet.
+- Tailscale-repositoryhantering har fått testbar konfiguration för repository-filen.
+- Systemidentifiering har fått testbar konfiguration för `/etc/os-release`.
 
 ### Förändrat
-- Refaktorerat till bibliotek i `lib/`
-- Infört `main()` som programmets startpunkt
+- `--list` visar nu moduler grupperade under backend (`APT`, `FLATPAK`, `NPM`) med paketantal per modul.
+- `print_modules()` följer den aktuella katalogstrukturen under `packages/<backend>/`.
+- Paketantal per modul beräknas via `read_module()` så att tomma rader och kommentarer inte räknas.
+- `check_commands()` har konsoliderats till en gemensam, parameteriserad implementation.
+- CLI-hjälp och versionshantering använder `APP_VERSION` konsekvent.
+- CLI:ts har rensats från temporära DEBUG-utskrifter.
+- Produktionskoden har anpassats för mer deterministisk testning.
 
+### Fixat
+- Rättat `--version` så att korrekt versionsvariabel används.
+- Rättat `--help` så att korrekt versionsvariabel används.
+- Rättat `--list` efter att paketdata flyttats till backend-specifika kataloger.
+- Tagit bort en gammal `count_packages()`-referens i `print_modules()`.
+- Tagit bort den äldre dubbla `check_commands()`-implementationen.
+- Tagit bort den gamla interna `test_read_module()`-hjälpfunktionen.
+- Rensat bort temporära felsökningsutskrifter från CLI:t.
 
-## [0.4.1] - 2026-07-13
+## [0.6.1] - 2026-08-10
 
-### Added
-- Stöd för `--version`
-- Förbättrad hantering av kommandoradsargument
+### Tillagt
+- Modulär systemdiagnostik (`doctor`).
+- Identifiering av operativsystem.
+- Identifiering av CPU-arkitektur.
+- Sudo-diagnostik.
+- Paketmanager-diagnostik.
+- Diagnostik av nödvändiga kommandon.
+- Diagnostikutskrift grupperad i sektioner.
 
-### Changed
-- Refaktorerat CLI till `lib/cli.sh`
-- Förbättrad felhantering för okända argument
-- Hjälptext visas endast med `--help` eller `-h`
-- Installationsmotorn körs i "dry run"-läge och skriver ut vilka paket som skulle installeras
+### Förändrat
+- Systemidentifiering refaktorerad till separata `detect`-/`check`-funktioner.
+- Förbättrad projektarkitektur med tydligare ansvar mellan komponenterna.
 
-### Fixed
-- Åtgärdat felaktig argumentöverföring (`$0` → `"$@"`)
-- Åtgärdat flera buggar i `case`-hanteringen
-- Korrigerat syntaxfel i `cli.sh`
-
-
-## [0.5.0] - 2026-07-15
-
-### Added
-
-- Modular package installation framework
-- Package verification functions
-- Module discovery
-- read_module()
-- install_module()
-- Logging framework
-- VERSION file
-- Improved CLI structure
-
-### Changed
-
-- Refactored project architecture
-- Separated module and package responsibilities
-- Improved bootstrap structure
-- Improved logging
-
-### Fixed
-
-- Duplicate package functions removed
-- Function ordering improved
-- Various CLI bugs
-
-## [0.6.0] - 2026-07-16
-
-### Added
-
-- Implemented --install option
-- Installation sammanfattning
-- Status codes.
-- New modules constants.sh, exit_codes.sh. dev.sh
-
-### Changed
-
-- Structure Cleanup so that install related functions are in install.sh and so on.
-
-### Fixed
-
-- clean up of structure.
-- correct handling of bootstrap.sh for source.
-- fixed several bugs.
+### Fixat
+- Förbättrad Bash-felhantering.
+- Förbättrad statushantering för paketinstallation.
 
 ## [0.6.0] - 2026-07-20
 
-### Added
-- Nytt installationssystem (`install.sh`).
+### Tillagt
+- Nytt installationssystem.
 - Stöd för installation av enskilda moduler (`--install <modul>`).
 - Stöd för `--dry-run`.
 - Nytt diagnostikkommando (`--doctor`).
 - Installationssammanfattning med statistik.
-- Gemensamma statuskoder för installation.
-- Gemensamma exit-koder.
+- Gemensamma statuskoder och exit-koder.
 - Projektkonstanter i egen modul.
 
-### Changed
+### Förändrat
 - Projektet har delats upp i mindre moduler med tydligare ansvar.
-- CLI:t har refaktorerats och stöder nu flera argument.
+- CLI:t har refaktorerats och stöder flera argument.
 - Installationsflödet har förenklats och blivit mer modulärt.
 - Förbättrad loggning och utskrift under installation.
 - Förbättrad struktur för felsökning och framtida utbyggnad.
 
-### Fixed
+### Fixat
 - Flera problem i argumenthanteringen.
 - Korrekt hantering av `set -Eeuo pipefail`.
 - Flera problem med `readonly`-variabler.
-- Förbättrad hantering av ShellCheck-varningar.
-- Åtgärdat flera fel i installationsflödet.
+- Flera fel i installationsflödet.
 
-## [0.6.1] - 2026-08-10
+## [0.5.0] - 2026-07-15
 
-### Added
-- Modular system diagnostics (`doctor`)
-- Operating system detection
-- CPU architecture detection
-- Sudo diagnostics
-- Package manager diagnostics
-- Required command diagnostics
-- Diagnostic output grouped into sections
+### Tillagt
+- Modulärt installationsramverk för paket.
+- Funktioner för paketverifiering.
+- Modulupptäckt.
+- `read_module()`.
+- Installationsfunktioner.
+- Loggningsramverk.
+- `VERSION`-fil.
+- Förbättrad CLI-struktur.
 
-### Changed
-- Refactored system detection into dedicated functions
-- Improved project architecture with detect/check pattern
+### Förändrat
+- Refaktorerad projektarkitektur.
+- Tydligare separation mellan moduler och paket.
+- Förbättrad bootstrap-struktur.
+- Förbättrad loggning.
 
-### Fixed
-- Improved Bash error handling
-- Fixed status handling for package installation
+### Fixat
+- Dubbla paketfunktioner tagits bort.
+- Förbättrad funktionsordning.
+- Olika CLI-buggar åtgärdade.
 
+## [0.4.1] - 2026-07-13
 
+### Tillagt
+- Stöd för `--version`.
+- Förbättrad hantering av kommandoradsargument.
 
+### Förändrat
+- CLI refaktorerat till `lib/cli.sh`.
+- Förbättrad felhantering för okända argument.
+- Hjälptext visas med `--help` eller `-h`.
+- Installationsmotorn kan köras i dry-run-läge och visar vilka paket som skulle installeras.
 
+### Fixat
+- Åtgärdad felaktig argumentöverföring (`$0` → `"$@"`).
+- Åtgärdade buggar i `case`-hanteringen.
+- Korrigerat syntaxfel i `cli.sh`.
 
+## [0.4.0] - 2026-07-13
 
+### Tillagt
+- Modulär projektstruktur.
+- Miljökontroller.
+- Modulupptäckt.
+- Paketräkning.
+- Sammanfattning.
+- Kommandoradsargument.
+- `--help`.
+- `--list`.
+- `--summary`.
 
-Status: Stabile
+### Förändrat
+- Refaktorerat till bibliotek i `lib/`.
+- Infört `main()` som programmets startpunkt.
+
+## [0.1.0] - 2026-07-05
+
+### Fixat
+- Pekade på fel mapp för `bootstrap.sh`.
+
+---
+
+Status: Stabil
+
