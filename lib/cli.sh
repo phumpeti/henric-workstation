@@ -8,8 +8,6 @@ parse_arguments() {
     local modules=""
 
 
-# printf "DEBUG: argument = '%s'\n" "${1:-}"
-
    while [[ $# -gt 0 ]] ; do
 
     case "$1" in
@@ -67,8 +65,6 @@ parse_arguments() {
 
 done
 
-echo "DEBUG: command=$command module=$module DRY_RUN=${DRY_RUN:-false}"
-
 case "$command" in
 
     "")
@@ -90,7 +86,7 @@ case "$command" in
 
     version)
 
-        printf "%s\n" "$VERSION"
+        printf "%s\n" "$APP_VERSION"
         ;;
 
     list)
@@ -110,7 +106,6 @@ case "$command" in
         ;;
 
     install)
-        echo "DEBUG: command=$command module=$module DRY_RUN=${DRY_RUN:-false}"
         if [[ "${DRY_RUN:-false}" == true ]]; then
             warn "DRY RUN - inga paket kommer att installeras."
             echo

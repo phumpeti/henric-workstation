@@ -61,33 +61,33 @@ count_modules() {
 print_modules() {
 
     local package_dir="$1"
+    local backend_dir
+    local module
+    local count
 
-    while read -r module
+    while IFS= read -r backend_dir
     do
-        local count
+        printf '\n%s\n' "$(basename "$backend_dir" | tr '[:lower:]' '[:upper:]')"
 
-        count=$(count_packages "$module")
+        while IFS= read -r module
+        do
+            count=$(read_module "$module" | wc -l)
 
-        printf "✓ %-25s (%2d paket)\n" \
-            "$(basename "$module")" \
-            "$count"
+            printf "✓ %-25s (%2d paket)\n" \
+                "$(basename "$module")" \
+                "$count"
 
-    done < <(find_modules "$package_dir")
+        done < <(find_modules "$backend_dir")
 
+    done < <(
+        find "$package_dir" \
+            -mindepth 1 \
+            -maxdepth 1 \
+            -type d |
+        sort
+    )
 }
 
-test_read_module() {
-
-    printf "Testar read_module... "
-
-    if [[ $(read_module packages/01-base.txt | wc -l) -eq 16 ]]
-    then
-        success "OK"
-    else
-        error "FAIL"
-    fi
-
-}
 
 read_module() {
     local module="$1"

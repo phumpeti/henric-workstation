@@ -27,10 +27,11 @@ add_tailscale_repository() {
         sudo tee "$list" >/dev/null
 }
 
-tailscale_repository_exists() {
-    local list="/etc/apt/sources.list.d/tailscale.list"
+TAILSCALE_REPOSITORY_FILE="${TAILSCALE_REPOSITORY_FILE:-/etc/apt/sources.list.d/tailscale.list}"
 
-    [[ -f "$list" ]]
+tailscale_repository_exists() {
+
+    [[ -f "$TAILSCALE_REPOSITORY_FILE" ]]
 }
 
 ensure_tailscale_repository() {

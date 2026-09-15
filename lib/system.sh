@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 
+OS_RELEASE_FILE="${OS_RELEASE_FILE:-/etc/os-release}"
+
 detect_system() {
 
-    [[ -f /etc/os-release ]] || return 1
+    [[ -f "$OS_RELEASE_FILE" ]] || return 1
 
-    source /etc/os-release
+    source "$OS_RELEASE_FILE"
 
     CPU_ARCH="$(uname -m)"
     OS_ID="$ID"
