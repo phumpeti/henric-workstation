@@ -38,3 +38,15 @@ npm_path_configured() {
 
     [[ ":$PATH:" == *":$bin_dir:"* ]]
 }
+
+npm_update() {
+    if [[ "${DRY_RUN:-false}" == true ]]
+    then
+        printf 'DRY RUN: npm update --prefix "%s" -g\n' "$(npm_prefix)"
+        return 0
+    fi
+
+    npm update \
+        --prefix "$(npm_prefix)" \
+        -g
+}

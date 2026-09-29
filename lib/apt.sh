@@ -17,3 +17,14 @@ apt_install() {
 
     sudo apt-get install -y "$@"
 }
+
+apt_update() {
+    if [[ "${DRY_RUN:-false}" == true ]]
+    then
+        printf 'DRY RUN: apt-get update && apt-get upgrade -y\n'
+        return 0
+    fi
+
+    sudo apt-get update &&
+        sudo apt-get upgrade -y
+}

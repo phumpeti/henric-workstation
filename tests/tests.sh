@@ -3417,6 +3417,470 @@ run_print_help_test() {
     echo "[$TEST_NUMBER] OK: print_help visar hjälptext och alternativ"
 }
 
+run_apt_update_dry_run_test() {
+    next_test
+
+    local output
+    local result
+    local original_dry_run="${DRY_RUN:-false}"
+
+    source ./lib/apt.sh
+
+    DRY_RUN=true
+
+    if output=$(apt_update)
+    then
+        result=0
+    else
+        result=$?
+    fi
+
+    DRY_RUN="$original_dry_run"
+
+    if [[ "$result" -ne 0 ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: apt_update dry-run returnerade status $result"
+        return 1
+    fi
+
+    if [[ "$output" != *"DRY RUN: apt-get update && apt-get upgrade -y"* ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: apt_update skrev ut fel dry-run-kommando"
+        return 1
+    fi
+
+    echo "[$TEST_NUMBER] OK: apt_update hanterar dry-run"
+}
+
+run_apt_update_test() {
+    next_test
+
+    local output
+    local result
+
+    source ./lib/apt.sh
+
+    DRY_RUN=false
+
+    sudo() {
+        printf 'SUDO: %s\n' "$*"
+        return 0
+    }
+
+    if output=$(apt_update)
+    then
+        result=0
+    else
+        result=$?
+    fi
+
+    if [[ "$result" -ne 0 ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: apt_update misslyckades"
+        return 1
+    fi
+
+    if [[ "$output" != $'SUDO: apt-get update\nSUDO: apt-get upgrade -y' ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: apt_update anropade inte rätt kommandon i rätt ordning"
+        return 1
+    fi
+
+    echo "[$TEST_NUMBER] OK: apt_update hanterar riktig uppdateringsväg"
+}
+
+run_apt_update_failure_test() {
+    next_test
+
+    local output
+    local result
+
+    source ./lib/apt.sh
+
+    DRY_RUN=false
+
+    sudo() {
+        printf 'SUDO: %s\n' "$*"
+
+        if [[ "$2" == "update" ]]
+        then
+            return 1
+        fi
+
+        return 0
+    }
+
+    set +e
+    output=$(apt_update)
+    result=$?
+    set -e
+
+    if [[ "$result" -ne 1 ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: apt_update borde returnera 1 när update misslyckas"
+        return 1
+    fi
+
+    if [[ "$output" != *"SUDO: apt-get update"* ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: apt_update körde inte apt-get update"
+        return 1
+    fi
+
+    if [[ "$output" == *"SUDO: apt-get upgrade -y"* ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: apt-get upgrade kördes trots misslyckad update"
+        return 1
+    fi
+
+    echo "[$TEST_NUMBER] OK: apt_update stoppar vid misslyckad update"
+}
+
+run_apt_update_upgrade_failure_test() {
+    next_test
+
+    local output
+    local result
+
+    source ./lib/apt.sh
+
+    DRY_RUN=false
+
+    sudo() {
+        printf 'SUDO: %s\n' "$*"
+
+        if [[ "$2" == "upgrade" ]]
+        then
+            return 1
+        fi
+
+        return 0
+    }
+
+    set +e
+    output=$(apt_update)
+    result=$?
+    set -e
+
+    if [[ "$result" -ne 1 ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: apt_update borde returnera 1 när upgrade misslyckas"
+        return 1
+    fi
+
+    if [[ "$output" != *"SUDO: apt-get update"* ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: apt-get update kördes inte"
+        return 1
+    fi
+
+    if [[ "$output" != *"SUDO: apt-get upgrade -y"* ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: apt-get upgrade kördes inte"
+        return 1
+    fi
+
+    echo "[$TEST_NUMBER] OK: apt_update propagerar fel från upgrade"
+}
+
+run_flatpak_update_dry_run_test() {
+    next_test
+
+    local output
+    local result
+    local original_dry_run="${DRY_RUN:-false}"
+
+    source ./lib/flatpak.sh
+
+    DRY_RUN=true
+
+    if output=$(flatpak_update)
+    then
+        result=0
+    else
+        result=$?
+    fi
+
+    DRY_RUN="$original_dry_run"
+
+    if [[ "$result" -ne 0 ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: flatpak_update dry-run returnerade status $result"
+        return 1
+    fi
+
+    if [[ "$output" != *"DRY RUN: flatpak update -y"* ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: flatpak_update skrev ut fel dry-run-kommando"
+        return 1
+    fi
+
+    echo "[$TEST_NUMBER] OK: flatpak_update hanterar dry-run"
+}
+
+run_flatpak_update_test() {
+    next_test
+
+    local output
+    local result
+
+    source ./lib/flatpak.sh
+
+    DRY_RUN=false
+
+    flatpak() {
+        printf 'FLATPAK: %s\n' "$*"
+        return 0
+    }
+
+    if output=$(flatpak_update)
+    then
+        result=0
+    else
+        result=$?
+    fi
+
+    if [[ "$result" -ne 0 ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: flatpak_update misslyckades"
+        return 1
+    fi
+
+    if [[ "$output" != "FLATPAK: update -y" ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: flatpak_update anropade fel kommando"
+        return 1
+    fi
+
+    echo "[$TEST_NUMBER] OK: flatpak_update hanterar riktig uppdateringsväg"
+}
+
+run_flatpak_update_failure_test() {
+    next_test
+
+    local output
+    local result
+
+    source ./lib/flatpak.sh
+
+    DRY_RUN=false
+
+    flatpak() {
+        printf 'FLATPAK: %s\n' "$*"
+        return 1
+    }
+
+    set +e
+    output=$(flatpak_update)
+    result=$?
+    set -e
+
+    if [[ "$result" -ne 1 ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: flatpak_update borde returnera 1 när uppdateringen misslyckas"
+        return 1
+    fi
+
+    if [[ "$output" != "FLATPAK: update -y" ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: flatpak_update anropade inte rätt kommando"
+        return 1
+    fi
+
+    echo "[$TEST_NUMBER] OK: flatpak_update propagerar uppdateringsfel"
+}
+
+run_npm_update_dry_run_test() {
+    next_test
+
+    local output
+    local result
+    local original_dry_run="${DRY_RUN:-false}"
+
+    source ./lib/npm.sh
+
+    DRY_RUN=true
+
+    if output=$(npm_update)
+    then
+        result=0
+    else
+        result=$?
+    fi
+
+    DRY_RUN="$original_dry_run"
+
+    if [[ "$result" -ne 0 ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: npm_update dry-run returnerade status $result"
+        return 1
+    fi
+
+    if [[ "$output" != *"DRY RUN: npm update --prefix \"$HOME/.local\" -g"* ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: npm_update skrev ut fel dry-run-kommando"
+        return 1
+    fi
+
+    echo "[$TEST_NUMBER] OK: npm_update hanterar dry-run"
+}
+
+run_npm_update_test() {
+    next_test
+
+    local output
+    local result
+
+    source ./lib/npm.sh
+
+    npm() {
+        echo "STUB: npm $*"
+    }
+
+    if output=$(npm_update)
+    then
+        result=0
+    else
+        result=$?
+    fi
+
+    unset -f npm
+
+    if [[ "$result" -ne 0 ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: npm_update returnerade status $result"
+        return 1
+    fi
+
+    if [[ "$output" != *"STUB: npm update --prefix $HOME/.local -g"* ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: npm_update anropade fel kommando"
+        return 1
+    fi
+
+    echo "[$TEST_NUMBER] OK: npm_update hanterar riktig uppdateringsväg"
+}
+
+run_npm_update_failure_test() {
+    next_test
+
+    local result
+
+    source ./lib/npm.sh
+
+    npm() {
+        return 42
+    }
+
+    if npm_update
+    then
+        result=0
+    else
+        result=$?
+    fi
+
+    unset -f npm
+
+    if [[ "$result" -ne 42 ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: npm_update returnerade status $result istället för 42"
+        return 1
+    fi
+
+    echo "[$TEST_NUMBER] OK: npm_update propagerar uppdateringsfel"
+}
+
+run_update_system_test() {
+    next_test
+
+    local output
+    local result
+
+    apt_update() {
+        echo "STUB: apt_update"
+    }
+
+    flatpak_update() {
+        echo "STUB: flatpak_update"
+    }
+
+    npm_update() {
+        echo "STUB: npm_update"
+    }
+
+    source ./lib/update.sh
+
+    if output=$(update_system)
+    then
+        result=0
+    else
+        result=$?
+    fi
+
+    unset -f apt_update flatpak_update npm_update
+
+    if [[ "$result" -ne 0 ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: update_system returnerade status $result"
+        return 1
+    fi
+
+    if [[ "$output" != $'STUB: apt_update\nSTUB: flatpak_update\nSTUB: npm_update' ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: update_system anropade inte backenderna i rätt ordning"
+        return 1
+    fi
+
+    echo "[$TEST_NUMBER] OK: update_system anropar alla backends i rätt ordning"
+}
+
+run_update_system_failure_test() {
+    next_test
+
+    local output
+    local result
+
+    apt_update() {
+        echo "STUB: apt_update"
+        return 1
+    }
+
+    flatpak_update() {
+        echo "STUB: flatpak_update"
+    }
+
+    npm_update() {
+        echo "STUB: npm_update"
+    }
+
+    source ./lib/update.sh
+
+    if output=$(update_system)
+    then
+        result=0
+    else
+        result=$?
+    fi
+
+    unset -f apt_update flatpak_update npm_update
+
+    if [[ "$result" -ne 1 ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: update_system returnerade status $result istället för 1"
+        return 1
+    fi
+
+    if [[ "$output" != *"STUB: flatpak_update"* ||
+          "$output" != *"STUB: npm_update"* ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: update_system fortsatte inte med alla backends"
+        return 1
+    fi
+
+    echo "[$TEST_NUMBER] OK: update_system fortsätter efter backend-fel"
+}
+
+
 
 
 run_named_module_test
@@ -3504,3 +3968,15 @@ run_tailscale_repository_exists_failure_test
 run_ensure_tailscale_repository_test
 run_ensure_tailscale_repository_exists_test
 run_print_help_test
+run_apt_update_dry_run_test
+run_apt_update_test
+run_apt_update_failure_test
+run_apt_update_upgrade_failure_test
+run_flatpak_update_dry_run_test
+run_flatpak_update_test
+run_flatpak_update_failure_test
+run_npm_update_dry_run_test
+run_npm_update_test
+run_npm_update_failure_test
+run_update_system_test
+run_update_system_failure_test

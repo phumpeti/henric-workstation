@@ -15,3 +15,13 @@ flatpak_install() {
 
     flatpak install -y flathub "$@"
 }
+
+flatpak_update() {
+    if [[ "${DRY_RUN:-false}" == true ]]
+    then
+        printf 'DRY RUN: flatpak update -y\n'
+        return 0
+    fi
+
+    flatpak update -y
+}
