@@ -64,9 +64,24 @@ Simulera installation:
 ./bootstrap.sh --install --dry-run
 ```
 
+## Uppdatera systemet
+
+Uppdatera APT-paket, Flatpak-applikationer och globala npm-paket:
+
+```bash
+./bootstrap.sh --update
+```
+
+Simulera uppdateringen utan att utföra några ändringar:
+
+```bash
+./bootstrap.sh --dry-run --update
+```
+
 ## Diagnostics
 
 Run a full system diagnostic before installation:
 
 ```bash
 ./bootstrap.sh --doctor
+```

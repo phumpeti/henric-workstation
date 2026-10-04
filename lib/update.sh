@@ -6,6 +6,8 @@
 update_system() {
     local failed=0
 
+    load_backends || return 1
+
     if ! apt_update
     then
         error "APT-uppdateringen misslyckades."

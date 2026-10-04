@@ -3790,6 +3790,36 @@ run_npm_update_failure_test() {
     echo "[$TEST_NUMBER] OK: npm_update propagerar uppdateringsfel"
 }
 
+run_main_update_failure_test() {
+    next_test
+
+    local output
+    local result
+
+    if output=$(bash -c '
+        source ./bootstrap.sh
+
+        update_system() {
+            return 7
+        }
+
+        main --update
+    ' 2>&1)
+    then
+        result=0
+    else
+        result=$?
+    fi
+
+    if [[ "$result" -ne 7 ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: main returnerade status $result i stället för 7"
+        return 1
+    fi
+
+    echo "[$TEST_NUMBER] OK: main propagerar felstatus från --update"
+}
+
 run_update_system_test() {
     next_test
 
@@ -3806,6 +3836,10 @@ run_update_system_test() {
 
     npm_update() {
         echo "STUB: npm_update"
+    }
+
+    load_backends() {
+        return 0
     }
 
     source ./lib/update.sh
@@ -3853,6 +3887,10 @@ run_update_system_failure_test() {
         echo "STUB: npm_update"
     }
 
+    load_backends() {
+        return 0
+    }
+
     source ./lib/update.sh
 
     if output=$(update_system)
@@ -3878,6 +3916,37 @@ run_update_system_failure_test() {
     fi
 
     echo "[$TEST_NUMBER] OK: update_system fortsätter efter backend-fel"
+}
+
+run_parse_arguments_update_failure_test() {
+    next_test
+
+    source ./lib/cli.sh
+
+    update_system() {
+        return 7
+    }
+
+    info() {
+        :
+    }
+
+    local result
+
+    if parse_arguments --update
+    then
+        result=0
+    else
+        result=$?
+    fi
+
+    if [[ "$result" -ne 7 ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: --update returnerade status $result i stället för 7"
+        return 1
+    fi
+
+    echo "[$TEST_NUMBER] OK: --update propagerar felstatus"
 }
 
 
@@ -3978,5 +4047,7 @@ run_flatpak_update_failure_test
 run_npm_update_dry_run_test
 run_npm_update_test
 run_npm_update_failure_test
+run_main_update_failure_test
 run_update_system_test
 run_update_system_failure_test
+run_parse_arguments_update_failure_test

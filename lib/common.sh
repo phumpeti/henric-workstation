@@ -124,7 +124,7 @@ Alternativ:
 
     --doctor       Kontrollera systemet
 
-    --update       Uppdatera systemet (kommer)
+    --update       Uppdatera systemet
 
 EOF
 

@@ -22,6 +22,10 @@ parse_arguments() {
             DRY_RUN=true
             ;;
 
+        --update)
+            command="update"
+            ;;
+
         --install)
 
             command="install"
@@ -105,6 +109,16 @@ case "$command" in
         print_summary "$modules" "$packages"
         ;;
 
+    update)
+        if [[ "${DRY_RUN:-false}" == true ]]; then
+            warn "DRY RUN - inga uppdateringar kommer att utföras."
+            echo
+        fi
+
+        update_system
+        ;;
+
+
     install)
         if [[ "${DRY_RUN:-false}" == true ]]; then
             warn "DRY RUN - inga paket kommer att installeras."
@@ -121,6 +135,9 @@ case "$command" in
 
 esac
 
+local command_status=$?
 
 info "Tid: ${SECONDS}s"
+
+return "$command_status"
 }
