@@ -108,8 +108,11 @@ printf "%-20s %d\n" "Errors:" "$error_count"
 
     if (( error_count == 0 )); then
         success "System ready for installation."
+        DOCTOR_MODE=false
+        return 0
     else
         error "Problems detected."
+        DOCTOR_MODE=false
+        return 1
     fi
-DOCTOR_MODE=false    
 }

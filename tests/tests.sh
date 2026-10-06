@@ -186,6 +186,59 @@ run_find_modules_test() {
     echo "[$TEST_NUMBER] OK find_modules hittar endast moduler på rätt nivå"
 }
 
+run_find_module_test() {
+    next_test
+    local test_dir
+    local output
+    local expected
+
+    test_dir=$(mktemp -d)
+
+    mkdir -p "$test_dir/apt" "$test_dir/flatpak"
+
+    touch "$test_dir/apt/01-target.txt"
+    touch "$test_dir/apt/02-target.txt"
+    touch "$test_dir/apt/03-other.txt"
+    touch "$test_dir/flatpak/01-target.txt"
+    touch "$test_dir/flatpak/02-other.txt"
+
+    output=$(bash -c '
+        PACKAGE_DIR="$1"
+        source ./lib/modules.sh
+        find_module "missing" || true
+    ' _ "$test_dir")
+
+    if [[ -n "$output" ]]
+    then
+        rm -rf "$test_dir"
+        echo "[$TEST_NUMBER] FAIL: find_module returnerade träff för okänd modul"
+        return 1
+    fi
+
+    expected=$(
+        printf '%s\n' \
+            "$test_dir/apt/01-target.txt" \
+            "$test_dir/apt/02-target.txt" \
+            "$test_dir/flatpak/01-target.txt"
+    )
+
+    output=$(bash -c '
+        PACKAGE_DIR="$1"
+        source ./lib/modules.sh
+        find_module "target"
+    ' _ "$test_dir")
+
+    rm -rf "$test_dir"
+
+    if [[ "$output" != "$expected" ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: find_module returnerade fel moduler"
+        return 1
+    fi
+
+    echo "[$TEST_NUMBER] OK find_module hittar och sorterar moduler i alla backends"
+}
+
 run_count_modules_test() {
     next_test
     local test_dir
@@ -369,11 +422,18 @@ EOF
 org.gimp.GIMP
 EOF
 
+    cat > "$test_dir/flatpak/02-four.txt" <<'EOF'
+# Detta är en kommentar
+
+kdenlive
+    # Indenterad kommentar
+EOF
+
     result=$(count_all_packages "$test_dir")
 
     rm -rf "$test_dir"
 
-    if [[ "$result" != "6" ]]
+    if [[ "$result" != "7" ]]
     then
         echo "[$TEST_NUMBER] FAIL: count_all_packages returnerade '$result', förväntade 6"
         return 1
@@ -381,6 +441,49 @@ EOF
 
     echo "[$TEST_NUMBER] OK count_all_packages räknar paket korrekt"
 }
+
+run_process_module_failure_test() {
+    next_test
+    local test_dir
+    local module
+    local result
+
+    test_dir=$(mktemp -d)
+
+    mkdir "$test_dir/apt"
+    module="$test_dir/apt/01-test.txt"
+
+    printf '%s\n' "paket-som-inte-finns" > "$module"
+
+    if (
+        source ./bootstrap.sh >/dev/null 2>&1
+        DRY_RUN=false
+        apt_is_installed() {
+            return 1
+        }
+        apt_install() {
+            return 1
+        }
+        process_module "$module"
+    )
+    then
+        result=0
+    else
+        result=$?
+    fi
+
+    rm -rf "$test_dir"
+
+    if [[ "$result" -ne 1 ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: process_module returnerade inte fel vid misslyckad installation"
+        return 1
+    fi
+
+    echo "[$TEST_NUMBER] OK process_module returnerar fel vid misslyckad installation"
+}
+
+
 
 run_process_modules_unknown_backend_test() {
     next_test
@@ -584,6 +687,39 @@ run_ensure_repository_test() {
 
     echo "[$TEST_NUMBER] OK ensure_repository lämnar befintligt repository orört"
 }
+
+
+run_ensure_repository_failure_test() {
+    next_test
+
+    local result
+
+    source ./lib/repositories.sh
+
+    tailscale_repository_exists() {
+        return 1
+    }
+
+    add_tailscale_repository() {
+        return 1
+    }
+
+    if ensure_repository tailscale
+    then
+        result=0
+    else
+        result=$?
+    fi
+
+    if [[ "$result" -ne 1 ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: ensure_repository propagaterade inte repository-felet"
+        return 1
+    fi
+
+    echo "[$TEST_NUMBER] OK ensure_repository propagaterar repository-fel"
+}
+
 
 run_npm_helpers_test() {
     next_test
@@ -843,6 +979,50 @@ run_parse_arguments_version_test() {
     echo "[$TEST_NUMBER] OK parse_arguments hanterar --version"
 }
 
+run_parse_arguments_help_test() {
+    next_test
+    local output
+    local result
+
+    if output=$(bash -c '
+        source ./bootstrap.sh
+        parse_arguments --help
+    ' 2>&1)
+    then
+        result=0
+    else
+        result=$?
+    fi
+
+    if [[ "$result" -ne 0 ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: parse_arguments --help returnerade status $result"
+        return 1
+    fi
+
+    if [[ "$output" != *"Henric Workstation Bootstrap v$APP_VERSION"* ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: --help visade inte programversion"
+        return 1
+    fi
+
+    if [[ "$output" != *"--install MODUL"* ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: --help saknar information om modulinstallation"
+        return 1
+    fi
+
+    if [[ "$output" != *"--dry-run"* ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: --help saknar information om dry-run"
+        return 1
+    fi
+
+    echo "[$TEST_NUMBER] OK parse_arguments hanterar --help"
+}
+
+
+
 
 run_verify_package_installed_test() {
     next_test
@@ -1067,6 +1247,37 @@ run_parse_arguments_install_named_test() {
     echo "[$TEST_NUMBER] OK: parse_arguments hanterar --install med modul"
 }
 
+run_parse_arguments_install_failure_test() {
+    next_test
+
+    local result
+
+    source ./lib/cli.sh
+
+    install_all_modules() {
+        return 7
+    }
+
+    info() {
+        :
+    }
+
+    if parse_arguments --install
+    then
+        result=0
+    else
+        result=$?
+    fi
+
+    if [[ "$result" -ne 7 ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: --install returnerade status $result i stället för 7"
+        return 1
+    fi
+
+    echo "[$TEST_NUMBER] OK: --install propagerar felstatus"
+}
+
 run_parse_arguments_dry_run_test() {
     next_test
     local original_dry_run="${DRY_RUN-}"
@@ -1095,6 +1306,58 @@ run_parse_arguments_dry_run_test() {
 
     echo "[$TEST_NUMBER] OK: parse_arguments hanterar --dry-run"
 }
+
+run_parse_arguments_dry_run_named_module_test() {
+    next_test
+
+    local output
+    local result
+
+    if output=$(
+        bash -c '
+            source ./bootstrap.sh >/dev/null 2>&1
+
+            find_module() {
+                printf "%s\n" \
+                    "/tmp/apt/03-development.txt" \
+                    "/tmp/flatpak/01-development.txt" \
+                    "/tmp/npm/01-development.txt"
+            }
+
+            process_module() {
+                printf "PROCESS_MODULE: %s DRY_RUN=%s\n" "$1" "${DRY_RUN:-false}"
+                return 0
+            }
+
+            parse_arguments --dry-run --install development
+        ' 2>&1
+    )
+    then
+        result=0
+    else
+        result=$?
+    fi
+
+    if [[ "$result" -ne 0 ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: --dry-run --install development returnerade status $result"
+        return 1
+    fi
+
+    local expected_output
+    expected_output=$'PROCESS_MODULE: /tmp/apt/03-development.txt DRY_RUN=true\nPROCESS_MODULE: /tmp/flatpak/01-development.txt DRY_RUN=true\nPROCESS_MODULE: /tmp/npm/01-development.txt DRY_RUN=true'
+
+    if [[ "$output" != *"$expected_output"* ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: --dry-run --install development behandlade inte alla moduler korrekt"
+        echo "Fick:"
+        printf '%s\n' "$output"
+        return 1
+    fi
+
+    echo "[$TEST_NUMBER] OK: --dry-run --install development hanterar flera moduler"
+}
+
 
 run_parse_arguments_invalid_test() {
     next_test
@@ -1132,6 +1395,82 @@ run_parse_arguments_invalid_test() {
 
     echo "[$TEST_NUMBER] OK: parse_arguments avvisar okänt argument"
 }
+
+run_parse_arguments_multiple_commands_test() {
+    next_test
+    local output
+    local result
+
+    if output=$(
+        bash -c '
+            source ./bootstrap.sh >/dev/null 2>&1
+
+            error() {
+                printf "ERROR: %s\n" "$*"
+            }
+
+            parse_arguments --doctor --update
+        ' 2>&1
+    )
+    then
+        result=0
+    else
+        result=$?
+    fi
+
+    if [[ "$result" -eq 0 ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: flera huvudkommandon accepterades"
+        return 1
+    fi
+
+    if [[ "$output" != *"ERROR:"* ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: inget felmeddelande visades"
+        return 1
+    fi
+
+    echo "[$TEST_NUMBER] OK: parse_arguments avvisar flera huvudkommandon"
+}
+
+run_parse_arguments_install_update_test() {
+    next_test
+    local output
+    local result
+
+    if output=$(
+        bash -c '
+            source ./bootstrap.sh >/dev/null 2>&1
+
+            error() {
+                printf "ERROR: %s\n" "$*"
+            }
+
+            parse_arguments --install development --update
+        ' 2>&1
+    )
+    then
+        result=0
+    else
+        result=$?
+    fi
+
+    if [[ "$result" -eq 0 ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: --install och --update accepterades samtidigt"
+        return 1
+    fi
+
+    if [[ "$output" != *"ERROR:"* ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: inget felmeddelande visades"
+        return 1
+    fi
+
+    echo "[$TEST_NUMBER] OK: --install och --update avvisas tillsammans"
+}
+
+
 
 run_check_file_test() {
     next_test
@@ -1317,12 +1656,6 @@ run_check_project_test() {
         return 1
     fi
 
-    if [[ "$output" != *"CHECK_DIRECTORY: $SCRIPT_DIR/config"* ]]
-    then
-        echo "[$TEST_NUMBER] FAIL: config kontrollerades inte"
-        return 1
-    fi
-
     echo "[$TEST_NUMBER] OK: check_project kontrollerar projektstrukturen"
 }
 
@@ -1394,7 +1727,6 @@ run_check_environment_test() {
 
     mkdir "$test_dir/packages"
     mkdir "$test_dir/lib"
-    mkdir "$test_dir/config"
 
     if output=$(
         bash -c '
@@ -1446,12 +1778,6 @@ run_check_environment_test() {
         return 1
     fi
 
-    if [[ "$output" != *"SUCCESS: Hittade config/"* ]]
-    then
-        echo "[$TEST_NUMBER] FAIL: config kontrollerades inte"
-        return 1
-    fi
-
     echo "[$TEST_NUMBER] OK: check_environment hittar projektkatalogerna"
 }
 
@@ -1467,8 +1793,8 @@ run_check_environment_failure_test() {
     test_dir=$(mktemp -d)
 
     mkdir "$test_dir/packages"
-    mkdir "$test_dir/lib"
-    # config saknas med flit
+
+    # lib saknas med flit
 
     if output=$(
         bash -c '
@@ -1505,12 +1831,6 @@ run_check_environment_failure_test() {
     if [[ "$result" -ne 42 ]]
     then
         echo "[$TEST_NUMBER] FAIL: check_environment returnerade status $result"
-        return 1
-    fi
-
-    if [[ "$output" != *"ERROR: Saknar config/"* ]]
-    then
-        echo "[$TEST_NUMBER] FAIL: check_environment rapporterade inte saknad config/"
         return 1
     fi
 
@@ -1778,7 +2098,12 @@ run_print_doctor_summary_failure_test() {
         printf 'ERROR: %s\n' "$*"
     }
 
-    output=$(print_doctor_summary)
+    if output=$(print_doctor_summary)
+        then
+        result=0
+        else
+        result=$?
+    fi
 
     if [[ "$output" != *"ERROR: Problems detected."* ]]
     then
@@ -2812,6 +3137,143 @@ run_install_named_module_test() {
     echo "[$TEST_NUMBER] OK: install_named_module hanterar befintlig modul"
 }
 
+run_install_named_module_multiple_test() {
+    next_test
+
+    local output
+    local result
+
+    source ./lib/install_core.sh
+
+    find_module() {
+        printf '%s\n' \
+            '/tmp/apt/03-development.txt' \
+            '/tmp/flatpak/01-development.txt' \
+            '/tmp/npm/01-development.txt'
+    }
+
+    process_module() {
+        printf 'PROCESS_MODULE: %s\n' "$1"
+        return 0
+    }
+
+    if output=$(install_named_module development)
+    then
+        result=0
+    else
+        result=$?
+    fi
+
+    if [[ "$result" -ne 0 ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: install_named_module misslyckades med flera matchande moduler"
+        return 1
+    fi
+
+    local expected_output
+
+    expected_output=$'PROCESS_MODULE: /tmp/apt/03-development.txt\nPROCESS_MODULE: /tmp/flatpak/01-development.txt\nPROCESS_MODULE: /tmp/npm/01-development.txt'
+
+    if [[ "$output" != "$expected_output" ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: install_named_module behandlade inte modulerna i rätt ordning"
+        echo "Förväntat:"
+        printf '%s\n' "$expected_output"
+        echo "Fick:"
+        printf '%s\n' "$output"
+        return 1
+    fi
+
+    echo "[$TEST_NUMBER] OK: install_named_module hanterar flera matchande moduler"
+}
+
+run_install_named_module_middle_failure_test() {
+    next_test
+
+    local output
+    local result
+
+    source ./lib/install_core.sh
+
+    find_module() {
+        printf '%s\n' \
+            '/tmp/apt/03-development.txt' \
+            '/tmp/flatpak/01-development.txt' \
+            '/tmp/npm/01-development.txt'
+    }
+
+    process_module() {
+        printf 'PROCESS_MODULE: %s\n' "$1"
+
+        if [[ "$1" == '/tmp/flatpak/01-development.txt' ]]
+        then
+            return 1
+        fi
+
+        return 0
+    }
+
+    if output=$(install_named_module development)
+    then
+        result=0
+    else
+        result=$?
+    fi
+
+    if [[ "$result" -ne 1 ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: install_named_module returnerade inte 1 efter modulfelet"
+        return 1
+    fi
+
+    local expected_output
+    expected_output=$'PROCESS_MODULE: /tmp/apt/03-development.txt\nPROCESS_MODULE: /tmp/flatpak/01-development.txt\nPROCESS_MODULE: /tmp/npm/01-development.txt'
+
+    if [[ "$output" != "$expected_output" ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: install_named_module fortsatte inte efter modulfelet"
+        echo "Förväntat:"
+        printf '%s\n' "$expected_output"
+        echo "Fick:"
+        printf '%s\n' "$output"
+        return 1
+    fi
+
+    echo "[$TEST_NUMBER] OK: install_named_module fortsätter efter modulfel"
+}
+
+run_install_named_module_failure_test() {
+    next_test
+
+    local result
+
+    source ./lib/install_core.sh
+
+    find_module() {
+        printf '/tmp/05-media.txt\n'
+    }
+
+    process_module() {
+        return 1
+    }
+
+    if install_named_module media
+    then
+        result=0
+    else
+        result=$?
+    fi
+
+    if [[ "$result" -ne 1 ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: install_named_module propagaterade inte fel från process_module"
+        return 1
+    fi
+
+    echo "[$TEST_NUMBER] OK: install_named_module propagaterar fel"
+}
+
+
 run_install_all_modules_test() {
     next_test
 
@@ -2834,6 +3296,35 @@ run_install_all_modules_test() {
 
     echo "[$TEST_NUMBER] OK: install_all_modules använder process_modules korrekt"
 }
+
+run_install_all_modules_failure_test() {
+    next_test
+
+    local result
+
+    source ./lib/install_core.sh
+
+    process_modules() {
+        return 1
+    }
+
+    if install_all_modules
+    then
+        result=0
+    else
+        result=$?
+    fi
+
+    if [[ "$result" -ne 1 ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: install_all_modules propagaterade inte fel från process_modules"
+        return 1
+    fi
+
+    echo "[$TEST_NUMBER] OK: install_all_modules propagaterar fel"
+}
+
+
 
 run_load_backends_test() {
     next_test
@@ -2972,6 +3463,37 @@ run_apt_install_test() {
     echo "[$TEST_NUMBER] OK: apt_install hanterar riktig installationsväg"
 }
 
+run_apt_install_failure_test() {
+    next_test
+
+    local result
+
+    source ./lib/apt.sh
+
+    DRY_RUN=false
+
+    sudo() {
+        printf 'SUDO: %s\n' "$*"
+        return 1
+    }
+
+    if apt_install test-package
+    then
+        result=0
+    else
+        result=$?
+    fi
+
+    if [[ "$result" -ne 1 ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: apt_install propagaterade inte installationsfelet"
+        return 1
+    fi
+
+    echo "[$TEST_NUMBER] OK: apt_install propagaterar installationsfel"
+}
+
+
 run_flatpak_is_installed_test() {
     next_test
 
@@ -3097,6 +3619,36 @@ run_flatpak_install_test() {
 
     echo "[$TEST_NUMBER] OK: flatpak_install hanterar riktig installationsväg"
 }
+
+run_flatpak_install_failure_test() {
+    next_test
+
+    local result
+
+    source ./lib/flatpak.sh
+
+    DRY_RUN=false
+
+    flatpak() {
+        return 1
+    }
+
+    if flatpak_install test.package
+    then
+        result=0
+    else
+        result=$?
+    fi
+
+    if [[ "$result" -ne 1 ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: flatpak_install propagaterade inte installationsfelet"
+        return 1
+    fi
+
+    echo "[$TEST_NUMBER] OK: flatpak_install propagaterar installationsfel"
+}
+
 
 run_npm_is_installed_test() {
     next_test
@@ -3236,6 +3788,36 @@ run_npm_install_test() {
     echo "[$TEST_NUMBER] OK: npm_install hanterar riktig installationsväg"
 }
 
+run_npm_install_failure_test() {
+    next_test
+
+    local result
+
+    source ./lib/npm.sh
+
+    DRY_RUN=false
+
+    npm() {
+        return 1
+    }
+
+    if npm_install test-package
+    then
+        result=0
+    else
+        result=$?
+    fi
+
+    if [[ "$result" -ne 1 ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: npm_install propagaterade inte installationsfelet"
+        return 1
+    fi
+
+    echo "[$TEST_NUMBER] OK: npm_install propagaterar installationsfel"
+}
+
+
 run_tailscale_repository_exists_test() {
     next_test
 
@@ -3343,6 +3925,38 @@ run_ensure_tailscale_repository_test() {
 
     echo "[$TEST_NUMBER] OK: ensure_tailscale_repository lägger till saknat repository"
 }
+
+run_ensure_tailscale_repository_failure_test() {
+    next_test
+
+    local result
+
+    source ./lib/repositories.sh
+
+    tailscale_repository_exists() {
+        return 1
+    }
+
+    add_tailscale_repository() {
+        return 1
+    }
+
+    if ensure_tailscale_repository
+    then
+        result=0
+    else
+        result=$?
+    fi
+
+    if [[ "$result" -ne 1 ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: ensure_tailscale_repository propagaterade inte repository-felet"
+        return 1
+    fi
+
+    echo "[$TEST_NUMBER] OK: ensure_tailscale_repository propagaterar repository-fel"
+}
+
 
 run_ensure_tailscale_repository_exists_test() {
     next_test
@@ -3797,18 +4411,18 @@ run_main_update_failure_test() {
     local result
 
     if output=$(bash -c '
-        source ./bootstrap.sh
+    source ./bootstrap.sh
 
-        update_system() {
-            return 7
-        }
+    update_system() {
+        return 7
+    }
 
-        main --update
+    main --update
     ' 2>&1)
     then
-        result=0
+    result=0
     else
-        result=$?
+    result=$?
     fi
 
     if [[ "$result" -ne 7 ]]
@@ -3918,6 +4532,57 @@ run_update_system_failure_test() {
     echo "[$TEST_NUMBER] OK: update_system fortsätter efter backend-fel"
 }
 
+run_update_system_middle_failure_test() {
+    next_test
+
+    local output
+    local result
+
+    apt_update() {
+        echo "STUB: apt_update"
+    }
+
+    flatpak_update() {
+        echo "STUB: flatpak_update"
+        return 1
+    }
+
+    npm_update() {
+        echo "STUB: npm_update"
+    }
+
+    load_backends() {
+        return 0
+    }
+
+    source ./lib/update.sh
+
+    if output=$(update_system)
+    then
+        result=0
+    else
+        result=$?
+    fi
+
+    unset -f apt_update flatpak_update npm_update
+
+    if [[ "$result" -ne 1 ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: update_system returnerade status $result istället för 1"
+        return 1
+    fi
+
+    if [[ "$output" != *"STUB: apt_update"* ||
+          "$output" != *"STUB: flatpak_update"* ||
+          "$output" != *"STUB: npm_update"* ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: update_system fortsatte inte efter Flatpak-fel"
+        return 1
+    fi
+
+    echo "[$TEST_NUMBER] OK: update_system fortsätter efter fel i mellanbackend"
+}
+
 run_parse_arguments_update_failure_test() {
     next_test
 
@@ -3958,15 +4623,18 @@ run_get_backend_test
 run_supported_backend_test
 run_read_module_test
 run_find_modules_test
+run_find_module_test
 run_count_modules_test
 run_process_modules_test
 run_process_modules_failure_test
 run_process_module_test
+run_process_module_failure_test
 run_count_all_packages_test
 run_process_modules_unknown_backend_test
 run_process_module_backend_test
 run_package_repository_test
 run_ensure_repository_test
+run_ensure_repository_failure_test
 run_npm_helpers_test
 run_npm_path_test
 run_package_exists_test
@@ -3975,6 +4643,7 @@ run_verify_package_missing_test
 run_verify_package_not_installed_test
 run_print_summary_test
 run_parse_arguments_version_test
+run_parse_arguments_help_test
 run_verify_package_installed_test
 run_print_modules_test
 run_parse_arguments_list_test
@@ -3982,8 +4651,11 @@ run_parse_arguments_summary_test
 run_parse_arguments_doctor_test
 run_parse_arguments_install_all_test
 run_parse_arguments_install_named_test
+run_parse_arguments_install_failure_test
 run_parse_arguments_dry_run_test
+run_parse_arguments_dry_run_named_module_test
 run_parse_arguments_invalid_test
+run_parse_arguments_multiple_commands_test
 run_check_file_test
 run_check_directory_test
 run_check_project_test
@@ -4019,22 +4691,30 @@ run_error_test
 run_banner_test
 run_install_named_module_missing_test
 run_install_named_module_test
+run_install_named_module_multiple_test
+run_install_named_module_middle_failure_test
+run_install_named_module_failure_test
 run_install_all_modules_test
+run_install_all_modules_failure_test
 run_load_backends_test
 run_apt_is_installed_test
 run_apt_install_dry_run_test
 run_apt_install_test
+run_apt_install_failure_test
 run_flatpak_is_installed_test
 run_flatpak_is_installed_failure_test
 run_flatpak_install_dry_run_test
 run_flatpak_install_test
+run_flatpak_install_failure_test
 run_npm_is_installed_test
 run_npm_is_installed_failure_test
 run_npm_install_dry_run_test
 run_npm_install_test
+run_npm_install_failure_test
 run_tailscale_repository_exists_test
 run_tailscale_repository_exists_failure_test
 run_ensure_tailscale_repository_test
+run_ensure_tailscale_repository_failure_test
 run_ensure_tailscale_repository_exists_test
 run_print_help_test
 run_apt_update_dry_run_test
@@ -4050,4 +4730,6 @@ run_npm_update_failure_test
 run_main_update_failure_test
 run_update_system_test
 run_update_system_failure_test
+run_update_system_middle_failure_test
 run_parse_arguments_update_failure_test
+run_parse_arguments_install_update_test

@@ -4,8 +4,8 @@ parse_arguments() {
 
     local command=""
     local module=""
-    local packages=""
-    local modules=""
+    local command_set=false
+
 
 
    while [[ $# -gt 0 ]] ; do
@@ -14,8 +14,14 @@ parse_arguments() {
 
         --doctor)
 
-            command="doctor"
-            ;;
+    if [[ "$command_set" == true ]]; then
+        error "Flera huvudkommandon angavs: $command och doctor"
+        return 1
+    fi
+
+    command="doctor"
+    command_set=true
+    ;;
 
         --dry-run)
 
@@ -23,38 +29,76 @@ parse_arguments() {
             ;;
 
         --update)
+            if [[ "$command_set" == true ]]; then
+                error "Flera huvudkommandon angavs: $command och update"
+                return 1
+            fi
+
             command="update"
+            command_set=true
             ;;
 
         --install)
 
+             if [[ "$command_set" == true ]]; then
+                error "Flera huvudkommandon angavs: $command och install"
+                return 1
+            fi
+
             command="install"
+            command_set=true
 
             if [[ $# -gt 1 && "${2:0:1}" != "-" ]]; then
                 module="$2"
                 shift
             fi
 
-            ;;
+    ;;
 
         --summary)
 
+
+             if [[ "$command_set" == true ]]; then
+                error "Flera huvudkommandon angavs: $command och summary"
+                return 1
+            fi
+
             command="summary"
-            ;;
+            command_set=true
+
+    ;;
 
         --list)
 
+               if [[ "$command_set" == true ]]; then
+                error "Flera huvudkommandon angavs: $command och list"
+                return 1
+            fi
+
             command="list"
+            command_set=true
             ;;
 
         --help|-h)
 
+               if [[ "$command_set" == true ]]; then
+                error "Flera huvudkommandon angavs: $command och help"
+                return 1
+            fi
+
             command="help"
+            command_set=true
             ;;
 
         --version)
 
+               if [[ "$command_set" == true ]]; then
+                error "Flera huvudkommandon angavs: $command och version"
+                return 1
+            fi
+
             command="version"
+            command_set=true
             ;;
 
         *)

@@ -88,7 +88,6 @@ print_modules() {
     )
 }
 
-
 read_module() {
     local module="$1"
 
@@ -104,6 +103,7 @@ read_module() {
 process_module() {
     local module="$1"
     local backend
+    local repository
     local -a backend_functions
     local -a missing_packages=()
 
@@ -183,6 +183,7 @@ process_modules() {
     local package_dir="$1"
     local callback="$2"
     local backend_dir
+    local backend
     local status=0
 
 

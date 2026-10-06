@@ -54,5 +54,4 @@ check_project() {
 
     check_directory "$SCRIPT_DIR/packages"
     check_directory "$SCRIPT_DIR/lib"
-    check_directory "$SCRIPT_DIR/config"
 }

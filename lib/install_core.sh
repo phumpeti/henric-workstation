@@ -9,16 +9,24 @@ install_all_modules() {
 }
 
 install_named_module() {
-
     local name="$1"
+    local modules
     local module
+    local status=0
 
-    module=$(find_module "$name")
+    modules=$(find_module "$name")
 
-    if [[ -z "$module" ]]; then
+    if [[ -z "$modules" ]]; then
         error "Modulen '$name' finns inte."
         return "$EXIT_BAD_ARGUMENTS"
     fi
 
-    process_module "$module"
+    while IFS= read -r module
+    do
+        if ! process_module "$module"; then
+            status=1
+        fi
+    done <<< "$modules"
+
+    return "$status"
 }

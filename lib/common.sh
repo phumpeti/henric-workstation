@@ -73,7 +73,7 @@ check_environment() {
     local directories=(
         "$SCRIPT_DIR/packages"
         "$SCRIPT_DIR/lib"
-        "$SCRIPT_DIR/config"
+
     )
 
     for dir in "${directories[@]}"; do
@@ -106,25 +106,27 @@ print_summary() {
 
 print_help() {
 
-cat <<EOF
+    cat <<EOF
 Henric Workstation Bootstrap v$APP_VERSION
 
 Användning:
     bootstrap.sh [alternativ]
 
 Alternativ:
+    --help, -h           Visa denna hjälp
+    --version            Visa programversion
+    --list               Visa alla moduler
+    --summary            Visa sammanfattning
+    --doctor             Kontrollera systemet
+    --install            Installera alla moduler
+    --install MODUL      Installera en specifik modul
+    --update             Uppdatera systemet
+    --dry-run            Simulera installation eller uppdatering
 
-    --help         Visa denna hjälp
-
-    --list         Visa alla moduler
-
-    --summary      Visa sammanfattning
-
-    --install      Installera alla moduler
-
-    --doctor       Kontrollera systemet
-
-    --update       Uppdatera systemet
+Exempel:
+    ./bootstrap.sh --install development
+    ./bootstrap.sh --dry-run --install development
+    ./bootstrap.sh --dry-run --update
 
 EOF
 

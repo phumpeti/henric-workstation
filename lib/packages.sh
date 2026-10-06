@@ -70,9 +70,7 @@ count_all_packages() {
     do
         while IFS= read -r module
         do
-            count=$(grep -v '^[[:space:]]*$' "$module" |
-                    grep -v '^[[:space:]]*#' |
-                    wc -l)
+            count=$(awk '!/^[[:space:]]*($|#)/ { count++ } END { print count }' "$module")
 
             (( total += count ))
         done < <(find_modules "$backend_dir")
