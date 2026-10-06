@@ -21,17 +21,17 @@ detect_system() {
 check_os() {
     section " Operating system"
     detect_system || {
-        error " Kan inte identifiera operativsystem ." 
+        error " Kan inte identifiera operativsystem ."
         return 1
     }
-    
+
     if [[ "$OS_ID" != "debian" ]]; then
         error "Endast Debian stöds (hittade "$OS_ID")."
         return 1
     fi
-    
+
     success "$OS_NAME"
-    return 0 
+    return 0
 }
 
 

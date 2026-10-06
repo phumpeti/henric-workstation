@@ -45,7 +45,7 @@ check_directory() {
 
 check_project() {
 
-    section "Checking necessary files and directories" 
+    section "Checking necessary files and directories"
 
     check_file "$SCRIPT_DIR/VERSION"
     check_file "$SCRIPT_DIR/CHANGELOG.md"
