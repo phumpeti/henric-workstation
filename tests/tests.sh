@@ -4619,6 +4619,56 @@ run_update_system_middle_failure_test() {
     echo "[$TEST_NUMBER] OK: update_system fortsätter efter fel i mellanbackend"
 }
 
+run_update_system_load_backends_failure_test() {
+    next_test
+
+    local output
+    local result
+
+    load_backends() {
+        return 1
+    }
+
+    apt_update() {
+        echo "STUB: apt_update"
+    }
+
+    flatpak_update() {
+        echo "STUB: flatpak_update"
+    }
+
+    npm_update() {
+        echo "STUB: npm_update"
+    }
+
+    source ./lib/update.sh
+
+    if output=$(update_system)
+    then
+        result=0
+    else
+        result=$?
+    fi
+
+    unset -f load_backends apt_update flatpak_update npm_update
+
+    if [[ "$result" -ne 1 ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: update_system gav status $result när backends inte kunde laddas"
+        return 1
+    fi
+
+    if [[ -n "$output" ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: update_system fortsatte efter fel i load_backends"
+        return 1
+    fi
+
+    echo "[$TEST_NUMBER] OK: update_system avbryter när backends inte kan laddas"
+}
+
+
+
 run_parse_arguments_update_failure_test() {
     next_test
 
@@ -4768,5 +4818,6 @@ run_main_update_failure_test
 run_update_system_test
 run_update_system_failure_test
 run_update_system_middle_failure_test
+run_update_system_load_backends_failure_test
 run_parse_arguments_update_failure_test
 run_parse_arguments_install_update_test
