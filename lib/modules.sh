@@ -107,7 +107,11 @@ process_module() {
     local -a backend_functions
     local -a missing_packages=()
 
-    load_backends
+    if ! load_backends
+    then
+        error "Kunde inte ladda backends."
+        return 1
+    fi
 
     backend=$(get_backend "$module")
 
