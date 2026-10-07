@@ -3098,6 +3098,42 @@ run_install_named_module_missing_test() {
     echo "[$TEST_NUMBER] OK: install_named_module hanterar saknad modul"
 }
 
+run_install_named_module_missing_set_e_test() {
+    next_test
+
+    local result
+
+    if bash -c '
+        set -Eeuo pipefail
+
+        source ./lib/exit_codes.sh
+        source ./lib/install_core.sh
+
+        find_module() {
+            return 1
+        }
+
+        error() {
+            printf "ERROR: %s\n" "$*"
+        }
+
+        install_named_module nonexistent
+    '
+    then
+        result=0
+    else
+        result=$?
+    fi
+
+    if [[ "$result" -ne "$EXIT_BAD_ARGUMENTS" ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: install_named_module gav fel status under set -e: $result"
+        return 1
+    fi
+
+    echo "[$TEST_NUMBER] OK: install_named_module hanterar saknad modul under set -e"
+}
+
 run_install_named_module_test() {
     next_test
 
@@ -4690,6 +4726,7 @@ run_warn_test
 run_error_test
 run_banner_test
 run_install_named_module_missing_test
+run_install_named_module_missing_set_e_test
 run_install_named_module_test
 run_install_named_module_multiple_test
 run_install_named_module_middle_failure_test

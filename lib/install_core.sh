@@ -14,7 +14,7 @@ install_named_module() {
     local module
     local status=0
 
-    modules=$(find_module "$name")
+    modules=$(find_module "$name") || true
 
     if [[ -z "$modules" ]]; then
         error "Modulen '$name' finns inte."
