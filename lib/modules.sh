@@ -91,6 +91,14 @@ print_modules() {
 read_module() {
     local module="$1"
 
+    if [[ ! -r "$module" ]]
+    then
+        error "Kunde inte läsa modul: $(basename "$module")"
+        return 1
+    fi
+
+
+
     while IFS= read -r package
     do
         [[ -z "$package" ]] && continue
@@ -113,9 +121,13 @@ process_module() {
         return 1
     fi
 
-    backend=$(get_backend "$module")
+    if ! backend=$(get_backend "$module")
+    then
+        error "Kunde inte bestämma backend för modul: $(basename "$module")"
+        return 1
+    fi
 
-   mapfile -t backend_functions < <(get_backend_functions "$backend")
+    mapfile -t backend_functions < <(get_backend_functions "$backend")
 
     if (( ${#backend_functions[@]} != 2 ))
     then

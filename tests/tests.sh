@@ -448,6 +448,41 @@ run_process_module_load_backends_failure_test() {
     echo "[$TEST_NUMBER] OK process_module hanterar fel i load_backends under set -e"
 }
 
+
+run_process_module_get_backend_failure_test() {
+    next_test
+
+    local result
+
+    if bash -c '
+        set -Eeuo pipefail
+        source ./bootstrap.sh >/dev/null 2>&1
+
+        load_backends() {
+            return 0
+        }
+
+        get_backend() {
+            return 7
+        }
+
+        process_module "/tmp/fake-module.txt"
+    '
+    then
+        result=0
+    else
+        result=$?
+    fi
+
+    if [[ "$result" -ne 1 ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: process_module gav status $result när backend inte kunde bestämmas"
+        return 1
+    fi
+
+    echo "[$TEST_NUMBER] OK process_module hanterar fel i get_backend under set -e"
+}
+
 run_count_all_packages_test() {
     next_test
     local test_dir
@@ -4767,6 +4802,7 @@ run_process_modules_failure_test
 run_process_modules_missing_directory_test
 run_process_module_test
 run_process_module_load_backends_failure_test
+run_process_module_get_backend_failure_test
 run_process_module_failure_test
 run_count_all_packages_test
 run_process_modules_unknown_backend_test
