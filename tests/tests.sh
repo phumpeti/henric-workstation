@@ -346,6 +346,27 @@ run_process_modules_failure_test() {
     echo "[$TEST_NUMBER] OK process_modules propagerar callback-fel"
 }
 
+run_process_modules_missing_directory_test() {
+    next_test
+
+    local result
+
+    if process_modules "/tmp/does-not-exist-henric-workstation" true 2>/dev/null
+    then
+        result=0
+    else
+        result=$?
+    fi
+
+    if [[ "$result" -ne 1 ]]
+    then
+        echo "[$TEST_NUMBER] FAIL: process_modules gav status $result för saknad katalog"
+        return 1
+    fi
+
+    echo "[$TEST_NUMBER] OK process_modules hanterar saknad katalog"
+}
+
 run_process_module_test() {
     next_test
     local test_dir
@@ -4713,6 +4734,7 @@ run_find_module_test
 run_count_modules_test
 run_process_modules_test
 run_process_modules_failure_test
+run_process_modules_missing_directory_test
 run_process_module_test
 run_process_module_failure_test
 run_count_all_packages_test

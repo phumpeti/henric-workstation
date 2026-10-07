@@ -186,6 +186,12 @@ process_modules() {
     local backend
     local status=0
 
+    if [[ ! -d "$package_dir" ]]
+    then
+        error "Paketkatalogen finns inte: $package_dir"
+        return 1
+    fi
+
 
     while IFS= read -r backend_dir
     do
